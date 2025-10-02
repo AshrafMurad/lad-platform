@@ -5,11 +5,11 @@ import { getProjectValidationMessages } from "./validationMessages";
 export const createProjectValidationSchemas = (t: (key: string) => string) => {
   const messages = getProjectValidationMessages(t);
   const ProjectEssentialInfoSchema = z.object({
-    name: z
+    title: z
       .string()
       .min(1, messages.projectName.required)
       .min(2, messages.projectName.minLength),
-    type: z
+    project_type_id: z
       .number({
         error: messages.projectType.required,
       })
@@ -29,7 +29,7 @@ export const createProjectValidationSchemas = (t: (key: string) => string) => {
       })
       .min(1, messages.budget.required),
     budget_unit: z.string(),
-    duration: z
+    duration_value: z
       .number({
         error: messages.duration.required,
       })
@@ -43,7 +43,7 @@ export const createProjectValidationSchemas = (t: (key: string) => string) => {
     description: z
       .string()
       .min(1, messages.description.required)
-      .min(2, messages.description.minLength),
+      .min(20, messages.description.largeMinLength),
   });
 
   const ProjectClassificationSchema = z.object({
@@ -208,13 +208,14 @@ export const createProjectValidationSchemas = (t: (key: string) => string) => {
   });
 
   const ProjectPublishSchema = z.object({
-    offers_window_days: z.number({ 
-      error: messages.publish.offers_window_days.required,
-    }).min(1, messages.publish.offers_window_days.minValue),
+    offers_window_days: z
+      .number({
+        error: messages.publish.offers_window_days.required,
+      })
+      .min(1, messages.publish.offers_window_days.minValue),
     notify_matching_contractors: z.boolean(),
     notify_client_on_offer: z.boolean(),
   });
-
 
   return {
     ProjectEssentialInfoSchema,

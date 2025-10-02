@@ -1,34 +1,35 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { useProjectData } from "@/features/project/hooks/useProjectData";
 import { Project } from "@/features/project/types/project";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
-import { Badge } from "@/shared/components/ui/badge";
+import { ProjectCard } from "@/features/project/components/display/ProjectCard";
+import { ProjectTabs } from "@/features/project/components/display/ProjectTabs";
 import { Button } from "@/shared/components/ui/button";
-import { Progress } from "@/shared/components/ui/progress";
+import { Badge } from "@/shared/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 import {
-  Calendar,
-  MapPin,
-  DollarSign,
-  Clock,
-  Square,
-  FileText,
-  Settings,
-  Package,
-} from "lucide-react";
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/shared/components/ui/pagination";
+import { Package, Plus, Building2 } from "lucide-react";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ProjectsPage = () => {
+  const t = useTranslations("projectsList");
   const { getMockProjects } = useProjectData();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(6);
 
   useEffect(() => {
     // Simulate loading delay
@@ -44,13 +45,7 @@ const ProjectsPage = () => {
   }, [getMockProjects]);
 
   const getProjectTypeName = (typeId: number) => {
-    const types = {
-      1: "Residential Building",
-      2: "Commercial Building",
-      3: "Industrial Building",
-      4: "Infrastructure",
-    };
-    return types[typeId as keyof typeof types] || "Unknown";
+    return t(`projectTypes.${typeId}`) || t("projectTypes.unknown");
   };
 
   const getCompletionStatus = (project: Project) => {
@@ -58,7 +53,10 @@ const ProjectsPage = () => {
     const totalSteps = 5;
 
     // Check Essential Info completion
-    if (project.essential_info.name && project.essential_info.type > 0) {
+    if (
+      project.essential_info.title &&
+      project.essential_info.project_type_id > 0
+    ) {
       stepsCompleted++;
     }
 
@@ -102,153 +100,257 @@ const ProjectsPage = () => {
     const status = getCompletionStatus(project);
 
     if (status.completed === 0) {
-      return <Badge variant="secondary">Not Started</Badge>;
+      return (
+        <Badge variant="secondary">{t("projectCard.status.notStarted")}</Badge>
+      );
     } else if (status.completed === status.total) {
       return (
-        <Badge variant="default" className="bg-green-600">
-          Completed
+        <Badge variant="default" className="bg-green-600 hover:bg-green-700">
+          {t("projectCard.status.completed")}
         </Badge>
       );
     } else {
-      return <Badge variant="outline">In Progress</Badge>;
+      return (
+        <Badge variant="outline">{t("projectCard.status.inProgress")}</Badge>
+      );
     }
   };
 
   const getNextStep = (project: Project) => {
     const status = getCompletionStatus(project);
 
-    if (status.completed === 0) return "Essential Information";
-    if (status.completed === 1) return "Classification";
-    if (status.completed === 2) return "Documents";
-    if (status.completed === 3) return "BOQ";
-    if (status.completed === 4) return "Publish Settings";
-    return "Completed";
+    if (status.completed === 0) return t("steps.essentialInfo");
+    if (status.completed === 1) return t("steps.classification");
+    if (status.completed === 2) return t("steps.documents");
+    if (status.completed === 3) return t("steps.boq");
+    if (status.completed === 4) return t("steps.publishSettings");
+    return t("steps.completed");
   };
+
+  // Filter projects based on active tab
+  const filteredProjects = useMemo(() => {
+    if (activeTab === "all") return projects;
+
+    return projects.filter((project) => {
+      const status = getCompletionStatus(project);
+
+      switch (activeTab) {
+        case "inProgress":
+          return status.completed > 0 && status.completed < status.total;
+        case "draft":
+          return status.completed === 0;
+        case "pendingOffers":
+          // Mock logic - in real app this would check if project has pending offers
+          return Math.random() > 0.7;
+        case "pendingReview":
+          // Mock logic - in real app this would check if project is under review
+          return Math.random() > 0.8;
+        case "pendingSigning":
+          // Mock logic - in real app this would check if project is pending signing
+          return Math.random() > 0.9;
+        case "completed":
+          return status.completed === status.total;
+        default:
+          return true;
+      }
+    });
+  }, [projects, activeTab]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedProjects = filteredProjects.slice(startIndex, endIndex);
+
+  // Reset to first page when tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Header Skeleton */}
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-80" />
+        </div>
+
+        {/* Projects Grid Skeleton */}
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="overflow-hidden">
+              <CardHeader className="space-y-3">
+                <div className="flex justify-between items-start">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-6 w-20" />
+                </div>
+                <Skeleton className="h-4 w-24" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-4 w-12" />
+                  </div>
+                  <Skeleton className="h-2 w-full" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="h-9 flex-1" />
+                  <Skeleton className="h-9 flex-1" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">My Projects</h1>
-        <p className="text-gray-600">
-          Manage and track your construction projects
-        </p>
+    <div className="container mx-auto p-6 space-y-8">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-xl font-bold text-foreground flex items-center gap-3">
+            <Building2 className="h-4 w-4 text-design-main" />
+            {t("title")}
+          </h1>
+        </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {projects.map((project) => {
-          const status = getCompletionStatus(project);
-          const nextStep = getNextStep(project);
-
-          return (
-            <Card
-              key={project.id}
-              className="hover:shadow-lg transition-shadow"
-            >
-              <CardHeader>
-                <div className="flex justify-between items-start mb-2">
-                  <CardTitle className="text-lg font-semibold text-gray-900">
-                    {project.essential_info.name}
-                  </CardTitle>
-                  {getStatusBadge(project)}
-                </div>
-                <CardDescription className="text-sm text-gray-600">
-                  {getProjectTypeName(project.essential_info.type)}
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                {/* Project Details */}
-                <div className="space-y-2">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <MapPin className="h-4 w-4 mr-2" />
-                    <span>
-                      {project.essential_info.city},{" "}
-                      {project.essential_info.district}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center text-sm text-gray-600">
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    <span>
-                      {project.essential_info.budget.toLocaleString()}{" "}
-                      {project.essential_info.budget_unit}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Clock className="h-4 w-4 mr-2" />
-                    <span>
-                      {project.essential_info.duration}{" "}
-                      {project.essential_info.duration_unit}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Square className="h-4 w-4 mr-2" />
-                    <span>
-                      {project.essential_info.area_sqm.toLocaleString()} m²
-                    </span>
-                  </div>
-                </div>
-
-                {/* Progress Section */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Progress</span>
-                    <span className="font-medium">
-                      {status.completed}/{status.total} steps
-                    </span>
-                  </div>
-                  <Progress value={status.percentage} className="h-2" />
-                  <p className="text-xs text-gray-500">Next: {nextStep}</p>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2 pt-2">
-                  <Link
-                    href={`/dashboard/individual/projects/${project.id}/edit`}
-                  >
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <FileText className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                  </Link>
-
-                  <Link href={`/dashboard/individual/projects/${project.id}`}>
-                    <Button variant="default" size="sm" className="flex-1">
-                      <Settings className="h-4 w-4 mr-1" />
-                      View
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+      {/* Project Tabs */}
+      <div className="w-full overflow-hidden">
+        <ProjectTabs
+          projects={projects}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          getCompletionStatus={getCompletionStatus}
+        />
       </div>
+
+      {/* Projects Grid */}
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {paginatedProjects.map((project) => (
+          <ProjectCard
+            key={project.id}
+            project={project}
+            getProjectTypeName={getProjectTypeName}
+            getCompletionStatus={getCompletionStatus}
+            getStatusBadge={getStatusBadge}
+            getNextStep={getNextStep}
+          />
+        ))}
+      </div>
+
+      {/* Pagination */}
+      {filteredProjects.length > itemsPerPage && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8">
+          <div className="text-sm text-muted-foreground">
+            {t("pagination.showing")} {startIndex + 1} -{" "}
+            {Math.min(endIndex, filteredProjects.length)} {t("pagination.of")}{" "}
+            {filteredProjects.length} {t("pagination.results")}
+          </div>
+
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage > 1) {
+                      setCurrentPage(currentPage - 1);
+                    }
+                  }}
+                  className={
+                    currentPage === 1
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+
+              {/* Page Numbers */}
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNumber;
+                if (totalPages <= 5) {
+                  pageNumber = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNumber = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNumber = totalPages - 4 + i;
+                } else {
+                  pageNumber = currentPage - 2 + i;
+                }
+
+                return (
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentPage(pageNumber);
+                      }}
+                      isActive={currentPage === pageNumber}
+                      className="cursor-pointer"
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+
+              {totalPages > 5 && currentPage < totalPages - 2 && (
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              )}
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage < totalPages) {
+                      setCurrentPage(currentPage + 1);
+                    }
+                  }}
+                  className={
+                    currentPage === totalPages
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
 
       {/* Empty State */}
-      {projects.length === 0 && (
-        <div className="text-center py-12">
-          <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No projects yet
+      {filteredProjects.length === 0 && (
+        <div className="text-center py-16 px-6">
+          <div className="mx-auto w-24 h-24 bg-muted/50 rounded-full flex items-center justify-center mb-6">
+            <Package className="h-12 w-12 text-muted-foreground" />
+          </div>
+          <h3 className="text-xl font-semibold text-foreground mb-3">
+            {t("emptyState.title")}
           </h3>
-          <p className="text-gray-600 mb-4">
-            Get started by creating your first project
+          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+            {t("emptyState.description")}
           </p>
           <Link href="/dashboard/individual/projects/new">
-            <Button>Create New Project</Button>
+            <Button size="lg" className="gap-2">
+              <Plus className="h-5 w-5" />
+              {t("emptyState.createButton")}
+            </Button>
           </Link>
         </div>
       )}

@@ -4,7 +4,6 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@shared/components/ui/button";
-import { PhoneInput } from "@auth/components/phone-input/PhoneInput";
 import {
   Card,
   CardContent,
@@ -27,11 +26,12 @@ import { useRoleRegistration } from "@auth/flows/useRoleRegistration";
 import { useAuthStore } from "@auth/store/authStore";
 import { useGoogleAuth } from "@/features/auth/hooks";
 import { createValidationSchemas } from "@auth/utils/validation";
+import { RegistrationRole } from "@auth/types/auth";
+import { DynamicFormData } from "@/features/auth/types/auth";
 
 import Link from "next/link";
 import z from "zod";
 import { useTranslations } from "next-intl";
-import { E164Number } from "libphonenumber-js";
 import { Eye, EyeOff } from "lucide-react";
 import {
   getPasswordStrength,
@@ -39,13 +39,10 @@ import {
   getPasswordStrengthText,
 } from "../../utils/getPasswordStrength";
 
-const SocialLoginForm: React.FC<{ role: string; provider: string }> = ({
-  role,
-  provider,
-}) => {
+const SocialLoginForm: React.FC<{ provider: string }> = ({ provider }) => {
+  const role = "individual"; // Social login is only for individual users
   const store = useAuthStore();
-  const { handlePersonalInfoSubmit, getPersonalInfoSchema } =
-    useRoleRegistration();
+  const { handlePersonalInfoSubmit } = useRoleRegistration();
   const t = useTranslations("");
   const commonT = useTranslations("common");
   const authT = useTranslations("auth");
@@ -53,20 +50,40 @@ const SocialLoginForm: React.FC<{ role: string; provider: string }> = ({
 
   const onSubmit = handlePersonalInfoSubmit;
 
-  // Get the validation schema from the validation utility
+  // Get the appropriate validation schema based on role
   const validationSchemas = createValidationSchemas(t);
-  const socialLoginSchema = validationSchemas.SocialLoginFormSchema;
+  const getSchemaForRole = (role: string) => {
+    switch (role as RegistrationRole) {
+      case "individual":
+        return validationSchemas.individualRegistrationSchema;
+      case "supplier":
+        return validationSchemas.supplierRegistrationSchema;
+      case "engineering_office":
+        return validationSchemas.engineeringOfficeRegistrationSchema;
+      case "freelance_engineer":
+        return validationSchemas.freelanceEngineerRegistrationSchema;
+      case "contractor":
+        return validationSchemas.contractorRegistrationSchema;
+      case "organization":
+        return validationSchemas.organizationRegistrationSchema;
+      default:
+        return validationSchemas.baseRegistrationSchema;
+    }
+  };
 
-  const form = useForm<z.infer<typeof socialLoginSchema>>({
-    resolver: zodResolver(socialLoginSchema),
+  const schema = getSchemaForRole(role);
+
+  const form = useForm<any>({
+    resolver: zodResolver(schema),
+    mode: "onBlur", // Enable real-time validation
     defaultValues: {
-      firstName: "",
-      lastName: "",
+      name: "",
       email: "",
-      phoneNumber: "",
+      phone: "",
       password: "",
-      confirmPassword: "",
-      agreeToTerms: false,
+      password_confirmation: "",
+      country_id: "",
+      national_id: "", // Only individual fields
     },
     shouldUnregister: true,
   });
@@ -74,15 +91,16 @@ const SocialLoginForm: React.FC<{ role: string; provider: string }> = ({
   // Pre-fill form with third-party data when component mounts
   React.useEffect(() => {
     if (store.roleData.thirdPartyInfo) {
-      const data = store.roleData.thirdPartyInfo;
-      if (data.firstName) {
-        form.setValue("firstName", data.firstName);
+      const thirdPartyInfo = store.roleData.thirdPartyInfo;
+      // Combine firstName and lastName into name field
+      if (thirdPartyInfo.firstName || thirdPartyInfo.lastName) {
+        const fullName = `${thirdPartyInfo.firstName || ""} ${
+          thirdPartyInfo.lastName || ""
+        }`.trim();
+        form.setValue("name", fullName);
       }
-      if (data.lastName) {
-        form.setValue("lastName", data.lastName);
-      }
-      if (data.email) {
-        form.setValue("email", data.email);
+      if (thirdPartyInfo.email) {
+        form.setValue("email", thirdPartyInfo.email);
       }
     }
   }, [store.roleData.thirdPartyInfo, form]);
@@ -97,7 +115,7 @@ const SocialLoginForm: React.FC<{ role: string; provider: string }> = ({
     return () => subscription.unsubscribe();
   }, [form, store]);
 
-  const handleSubmit = async (values: z.infer<typeof socialLoginSchema>) => {
+  const handleSubmit = async (values: any) => {
     store.clearError();
 
     const result = await onSubmit(values, role);
@@ -117,35 +135,20 @@ const SocialLoginForm: React.FC<{ role: string; provider: string }> = ({
               onSubmit={form.handleSubmit(handleSubmit)}
               className="form-section"
             >
-              {/* First / Last Name */}
-              <div className="form-grid-2">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem className="form-item-vertical">
-                      <FormLabel>{authT("personalInfo.firstName")}</FormLabel>
-                      <FormControl>
-                        <Input {...field} disabled={isLoading} />
-                      </FormControl>
-                      <FormMessage className="form-message-min-height" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem className="form-item-vertical">
-                      <FormLabel>{authT("personalInfo.lastName")}</FormLabel>
-                      <FormControl>
-                        <Input {...field} disabled={isLoading} />
-                      </FormControl>
-                      <FormMessage className="form-message-height" />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              {/* Full Name */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{authT("personalInfo.fullName")}</FormLabel>
+                    <FormControl>
+                      <Input {...field} disabled={isLoading} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               {/* Email */}
               <FormField
@@ -170,16 +173,35 @@ const SocialLoginForm: React.FC<{ role: string; provider: string }> = ({
               {/* Phone Number */}
               <FormField
                 control={form.control}
-                name="phoneNumber"
+                name="phone"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{authT("personalInfo.phoneNumber")}</FormLabel>
                     <FormControl>
-                      <PhoneInput
-                        value={field.value as E164Number}
-                        onChange={field.onChange}
+                      <Input
+                        {...field}
+                        type="tel"
+                        placeholder="050 000 0000"
                         disabled={isLoading}
-                        smartCaret={true}
+                        value={
+                          field.value
+                            ? field.value.replace(
+                                /(\d{3})(\d{3})(\d{4})/,
+                                "$1 $2 $3"
+                              )
+                            : ""
+                        }
+                        onChange={(e) => {
+                          // Format phone number as user types
+                          let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
+                          if (value.startsWith("966")) {
+                            value = value.substring(3); // Remove 966 prefix if user types it
+                          }
+                          if (value.length > 10) {
+                            value = value.substring(0, 10); // Limit to 10 digits
+                          }
+                          field.onChange(value);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -238,7 +260,7 @@ const SocialLoginForm: React.FC<{ role: string; provider: string }> = ({
               {/* Confirm Password */}
               <FormField
                 control={form.control}
-                name="confirmPassword"
+                name="password_confirmation"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
@@ -277,37 +299,45 @@ const SocialLoginForm: React.FC<{ role: string; provider: string }> = ({
                 )}
               />
 
-              {/* Terms and Privacy */}
+              {/* National ID - Individual only */}
               <FormField
                 control={form.control}
-                name="agreeToTerms"
+                name="national_id"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormItem>
+                    <FormLabel>{authT("personalInfo.nationalId")}</FormLabel>
                     <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
+                      <Input
+                        {...field}
                         disabled={isLoading}
+                        placeholder={authT(
+                          "personalInfo.nationalIdPlaceholder"
+                        )}
                       />
                     </FormControl>
-                    <div className="form-checkbox-content">
-                      <FormLabel className="flex flex-wrap">
-                        <span>
-                          {authT("terms.text")}{" "}
-                          <Link href="#" className="link-muted">
-                            {authT("terms.termsLink")}
-                          </Link>{" "}
-                          {authT("terms.and")}{" "}
-                          <Link href="#" className="link-alt">
-                            {authT("terms.privacyLink")}
-                          </Link>
-                        </span>
-                      </FormLabel>
-                      <FormMessage />
-                    </div>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
+
+              {/* Terms and Privacy - Note: Terms validation is handled separately */}
+              <div className="flex flex-row items-start space-x-3 space-y-0">
+                <Checkbox checked={true} disabled={isLoading} />
+                <div className="form-checkbox-content">
+                  <FormLabel className="flex flex-wrap">
+                    <span>
+                      {authT("terms.text")}{" "}
+                      <Link href="#" className="link-muted">
+                        {authT("terms.termsLink")}
+                      </Link>{" "}
+                      {authT("terms.and")}{" "}
+                      <Link href="#" className="link-alt">
+                        {authT("terms.privacyLink")}
+                      </Link>
+                    </span>
+                  </FormLabel>
+                </div>
+              </div>
 
               {/* Error Display */}
               {store.error && (

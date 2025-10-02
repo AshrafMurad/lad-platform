@@ -17,7 +17,7 @@ import { createProjectValidationSchemas } from "@/features/project/utils/validat
 import { useProjectStore } from "@/features/project/store/projectStore";
 import { useCreateProject } from "@/features/project/hooks/useCreateProject";
 import ProjectType from "../../common/ProjectType";
-import CitySelect from "../../common/CitySelect";
+import { CitySelection } from "@/shared/components/ui/CitySelect";
 import {
   Select,
   SelectContent,
@@ -28,6 +28,7 @@ import {
 import DurationSelect from "../../common/DurationSelect";
 import { Textarea } from "@/shared/components/ui/textarea";
 import NavigationButtons from "../../common/NavigationButtons";
+import { toast } from "react-hot-toast";
 
 const EssentialInfoForm = ({ create }: { create?: boolean }) => {
   const t = useTranslations("");
@@ -37,8 +38,10 @@ const EssentialInfoForm = ({ create }: { create?: boolean }) => {
   const form = useForm<z.infer<typeof ProjectEssentialInfoSchema>>({
     resolver: zodResolver(ProjectEssentialInfoSchema),
     defaultValues: {
-      name: create ? "" : originalEssentialInfoData?.name || "",
-      type: create ? 0 : originalEssentialInfoData?.type || 0,
+      title: create ? "" : originalEssentialInfoData?.title || "",
+      project_type_id: create
+        ? 0
+        : originalEssentialInfoData?.project_type_id || 0,
       city: create ? "" : originalEssentialInfoData?.city || "",
       district: create ? "" : originalEssentialInfoData?.district || "",
       location: create ? "" : originalEssentialInfoData?.location || "",
@@ -46,7 +49,9 @@ const EssentialInfoForm = ({ create }: { create?: boolean }) => {
       budget_unit: create
         ? "SAR"
         : originalEssentialInfoData?.budget_unit || "SAR",
-      duration: create ? 0 : originalEssentialInfoData?.duration || 0,
+      duration_value: create
+        ? 0
+        : originalEssentialInfoData?.duration_value || 0,
       duration_unit: create
         ? "day"
         : originalEssentialInfoData?.duration_unit || "day",
@@ -63,14 +68,14 @@ const EssentialInfoForm = ({ create }: { create?: boolean }) => {
         originalEssentialInfoData
       );
       const formData = {
-        name: originalEssentialInfoData.name || "",
-        type: originalEssentialInfoData.type || 0,
+        title: originalEssentialInfoData.title || "",
+        project_type_id: originalEssentialInfoData.project_type_id || 0,
         city: originalEssentialInfoData.city || "",
         district: originalEssentialInfoData.district || "",
         location: originalEssentialInfoData.location || "",
         budget: originalEssentialInfoData.budget || 0,
         budget_unit: originalEssentialInfoData.budget_unit || "SAR",
-        duration: originalEssentialInfoData.duration || 0,
+        duration_value: originalEssentialInfoData.duration_value || 0,
         duration_unit: originalEssentialInfoData.duration_unit || "day",
         area_sqm: originalEssentialInfoData.area_sqm || 0,
         description: originalEssentialInfoData.description || "",
@@ -89,11 +94,19 @@ const EssentialInfoForm = ({ create }: { create?: boolean }) => {
     console.log("🚀 Submitting essential info:", data);
     console.log("📊 Original data for comparison:", originalEssentialInfoData);
     console.log("🔍 Form values:", form.getValues());
-    const result = await submitEssentialInfo(data);
-    if (!result.success) {
-      console.error("❌ Submission failed:", result.message);
-    } else {
-      console.log("✅ Submission successful:", result.message);
+
+    try {
+      const result = await submitEssentialInfo(data);
+      if (!result.success) {
+        console.error("❌ Submission failed:", result.message);
+        toast.error(result.message || t("project.step1.error.generic"));
+      } else {
+        console.log("✅ Submission successful:", result.message);
+        toast.success(result.message || t("project.step1.success"));
+      }
+    } catch (error) {
+      console.error("❌ Unexpected error:", error);
+      toast.error(t("project.step1.error.unexpected"));
     }
   };
 
@@ -117,7 +130,7 @@ const EssentialInfoForm = ({ create }: { create?: boolean }) => {
               <div className="grid grid-cols-1 items-start md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="title"
                   render={({ field }) => (
                     <FormItem className="form-item-vertical">
                       <FormLabel>{t("project.step1.name")} *</FormLabel>
@@ -130,7 +143,7 @@ const EssentialInfoForm = ({ create }: { create?: boolean }) => {
                 />
                 <FormField
                   control={form.control}
-                  name="type"
+                  name="project_type_id"
                   render={({ field }) => (
                     <FormItem className="form-item-vertical">
                       <FormLabel>{t("project.step1.type") + " *"}</FormLabel>
@@ -140,6 +153,10 @@ const EssentialInfoForm = ({ create }: { create?: boolean }) => {
                           onSelect={(value) => {
                             field.onChange(value);
                           }}
+                          placeholder={
+                            t("project.step1.typePlaceholder") ||
+                            "Select project type"
+                          }
                         />
                       </FormControl>
                       <FormMessage className="form-message-min-height" />
@@ -154,9 +171,8 @@ const EssentialInfoForm = ({ create }: { create?: boolean }) => {
                   render={({ field }) => (
                     <FormItem className="form-item-vertical">
                       <FormControl>
-                        <CitySelect
-                          selectedCountry="SA"
-                          selectedState="3501"
+                        <CitySelection
+                          hasIcon={false}
                           selectedCity={field.value}
                           onCityChange={field.onChange}
                           enableSearch={true}
@@ -165,6 +181,7 @@ const EssentialInfoForm = ({ create }: { create?: boolean }) => {
                             "Select a city"
                           }
                           label={t("project.step1.city") + " *"}
+                          onBlur={() => field.onBlur()}
                         />
                       </FormControl>
                       <FormMessage className="form-message-min-height" />
@@ -211,11 +228,10 @@ const EssentialInfoForm = ({ create }: { create?: boolean }) => {
                       <FormControl>
                         <div className="relative">
                           <Input
-                            dir="ltr"
                             type="number"
                             min={1}
                             inputMode="numeric"
-                            className="pe-18"
+                            className="pe-20"
                             value={budgetField.value || ""}
                             onChange={(e) => {
                               const val = e.target.value;
@@ -254,7 +270,7 @@ const EssentialInfoForm = ({ create }: { create?: boolean }) => {
 
                 <FormField
                   control={form.control}
-                  name="duration"
+                  name="duration_value"
                   render={({ field: durationField }) => (
                     <FormItem className="form-item-vertical">
                       <FormLabel>

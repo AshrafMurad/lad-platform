@@ -7,6 +7,7 @@
       "back": "رجوع",
       "next": "التالي",
       "previous": "السابق",
+      "morePages": "المزيد من الصفحات",
       "cancel": "إلغاء",
       "save": "حفظ",
       "saving": "جاري الحفظ...",
@@ -487,11 +488,17 @@
       "thirdPartyDescription": "يرجى تقديم معلومات إضافية لإكمال ملفك الشخصي",
       "firstName": "الاسم الأول",
       "lastName": "اسم العائلة",
+      "fullName": "الاسم الكامل",
       "email": "البريد الإلكتروني",
       "phoneNumber": "رقم الهاتف",
       "password": "كلمة المرور",
       "confirmPassword": "تأكيد كلمة المرور",
-      "nationalId": "الهوية الوطنية",
+      "nationalId": "رقم الهوية الوطنية",
+      "commercialRegisterNumber": "رقم السجل التجاري",
+      "licenseNumber": "رقم الترخيص",
+      "engineersAssociationNumber": "رقم نقابة المهندسين",
+      "businessName": "اسم الشركة",
+      "commercialRegisterFile": "ملف السجل التجاري",
       "continue": "متابعة"
     },
     "terms": {
@@ -857,9 +864,13 @@
         "description": "تحديث معلوماتك الأساسية والتفاصيل",
         "firstName": "الاسم الأول",
         "lastName": "اسم العائلة",
+        "fullName": "الاسم الكامل",
         "email": "البريد الإلكتروني",
         "phoneNumber": "رقم الهاتف",
         "nationalId": "رقم الهوية الوطنية",
+        "commercialRegisterNumber": "رقم السجل التجاري",
+        "licenseNumber": "رقم الترخيص",
+        "engineersAssociationNumber": "رقم نقابة المهندسين",
         "country": "البلد",
         "city": "المدينة",
         "state": "المحافظة",
@@ -1472,7 +1483,14 @@
       "area_sqm": "المساحة (متر مربع)",
       "area_sqmPlaceholder": "أدخل المساحة المتوقعة للمشروع",
       "description": "الوصف",
-      "descriptionPlaceholder": "أدخل وصف المشروع"
+      "descriptionPlaceholder": "أدخل وصف المشروع",
+      "success": "تم حفظ البيانات الأساسية بنجاح!",
+      "error": {
+        "generic": "فشل في حفظ البيانات الأساسية. يرجى المحاولة مرة أخرى.",
+        "unexpected": "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
+        "network": "خطأ في الشبكة. يرجى التحقق من اتصالك والمحاولة مرة أخرى.",
+        "validation": "يرجى التحقق من المدخلات والمحاولة مرة أخرى."
+      }
     },
     "step2": {
       "title": "اختيار الجهة المنفذة",
@@ -1676,6 +1694,19 @@
         "required": "رقم نقابة المهندسين مطلوب",
         "maxLength": "يجب ألا يتجاوز رقم نقابة المهندسين 50 حرفاً"
       },
+      "country": {
+        "required": "البلد مطلوب"
+      },
+      "businessName": {
+        "required": "اسم الشركة مطلوب",
+        "minLength": "اسم الشركة يجب أن يكون حرفين على الأقل",
+        "maxLength": "اسم الشركة يجب ألا يتجاوز 255 حرف"
+      },
+      "commercialRegisterFile": {
+        "required": "ملف السجل التجاري مطلوب",
+        "maxSize": "يجب أن يكون حجم الملف أقل من 8 ميجابايت",
+        "invalidType": "يجب أن يكون الملف من نوع PDF أو JPG أو JPEG أو PNG أو WEBP"
+      },
       "aboutMe": {
         "required": "معلومات عني مطلوبة",
         "maxLength": "يجب ألا تتجاوز معلومات عني 1000 حرف"
@@ -1701,6 +1732,24 @@
       },
       "otp": {
         "length": "يجب أن يتكون رمز التحقق من 6 أرقام"
+      },
+      "name": {
+        "required": "الاسم مطلوب",
+        "minLength": "الاسم يجب أن يكون حرفين على الأقل",
+        "maxLength": "الاسم طويل جداً",
+        "invalid": "الاسم يجب أن يحتوي على أحرف عربية أو إنجليزية فقط"
+      },
+      "phone": {
+        "required": "رقم الهاتف مطلوب",
+        "invalid": "رقم الهاتف غير صحيح. يجب أن يكون رقم سعودي بصيغة 05XXXXXXXX"
+      },
+      "commercialRegisterNumber": {
+        "required": "رقم السجل التجاري مطلوب",
+        "invalid": "رقم السجل التجاري يجب أن يكون 10 أرقام"
+      },
+      "licenseNumber": {
+        "required": "رقم الترخيص مطلوب",
+        "maxLength": "رقم الترخيص طويل جداً"
       },
       "organizationName": {
         "required": "اسم المؤسسة مطلوب"
@@ -1911,7 +1960,8 @@
       },
       "description": {
         "required": "يرجى إدخال الوصف",
-        "minLength": "الوصف يجب أن يكون على الأقل 2 أحرف"
+        "minLength": "الوصف يجب أن يكون على الأقل 2 أحرف",
+        "largeMinLength": "الوصف يجب أن يكون على الأقل 20 أحرف"
       },
       "jobId": {
         "required": "يرجى اختيار المهنة"
@@ -2042,6 +2092,69 @@
       "searchAndFilters": "البحث والتصفية",
       "searchPlaceholder": "البحث في المنتجات...",
       "allCategories": "جميع الفئات"
+  "projectsList": {
+    "title": "مشاريعي",
+    "subtitle": "إدارة ومتابعة مشاريعك الإنشائية",
+    "loading": "جاري تحميل المشاريع...",
+    "emptyState": {
+      "title": "لا توجد مشاريع بعد",
+      "description": "ابدأ بإنشاء مشروعك الأول",
+      "createButton": "إنشاء مشروع جديد"
+    },
+    "projectCard": {
+      "status": {
+        "notStarted": "لم يبدأ",
+        "inProgress": "قيد التنفيذ",
+        "completed": "مكتمل"
+      },
+      "details": {
+        "location": "الموقع",
+        "budget": "الميزانية",
+        "duration": "المدة",
+        "area": "المساحة"
+      },
+      "progress": {
+        "label": "التقدم",
+        "steps": "خطوات",
+        "nextStep": "التالي"
+      },
+      "actions": {
+        "edit": "تعديل",
+        "view": "عرض"
+      }
+    },
+    "projectTypes": {
+      "1": "مبنى سكني",
+      "2": "مبنى تجاري",
+      "3": "مبنى صناعي",
+      "4": "بنية تحتية",
+      "unknown": "غير محدد"
+    },
+    "steps": {
+      "essentialInfo": "البيانات الأساسية",
+      "classification": "التصنيف",
+      "documents": "المستندات",
+      "boq": "جدول الكميات",
+      "publishSettings": "إعدادات النشر",
+      "completed": "مكتمل"
+    },
+    "tabs": {
+      "all": "جميع المشاريع",
+      "inProgress": "قيد التنفيذ",
+      "draft": "مسودة",
+      "pendingOffers": "في انتظار العروض",
+      "pendingReview": "في انتظار المراجعة",
+      "pendingSigning": "في انتظار التوقيع",
+      "completed": "مكتمل"
+    },
+    "pagination": {
+      "showing": "عرض",
+      "of": "من",
+      "results": "نتيجة",
+      "previous": "السابق",
+      "next": "التالي",
+      "page": "صفحة",
+      "goToPage": "انتقل إلى الصفحة"
     }
   }
 }

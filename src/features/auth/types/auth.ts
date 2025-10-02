@@ -95,16 +95,26 @@ export interface BaseRegistrationState {
   error: string | null;
 }
 export interface PersonalInfo {
+  name?: string; // Full name field from validation schema
   firstName?: string;
   lastName?: string;
   email?: string;
-  phoneNumber?: string;
+  phone?: string; // Primary phone field from validation schema
+  phoneNumber?: string; // Legacy field for backward compatibility
   password?: string;
-  confirmPassword?: string;
-  phone?: string;
+  password_confirmation?: string; // Field name from validation schema
+  confirmPassword?: string; // Legacy field for backward compatibility
   organizationEmail?: string;
   organizationPhoneNumber?: string;
   authorizedPersonMobileNumber?: string;
+  country_id?: string; // From validation schema
+  commercial_register_file?: File; // From validation schema
+  // Role-specific fields
+  national_id?: string;
+  business_name?: string;
+  commercial_register_number?: string;
+  license_number?: string;
+  engineers_association_number?: string;
 }
 // بيانات خاصة بكل دور (تجمع كل أنواع الـ info)
 export interface RoleSpecificData {
@@ -191,10 +201,12 @@ export interface AuthResponse {
 }
 
 // Registration Request/Response Types
-export interface RegistrationRequest<T> {
+export interface RegistrationRequest<
+  T extends RegistrationData = RegistrationData
+> {
   userType: string;
-  role: string;
-  authMethod: string;
+  role: RegistrationRole;
+  authMethod: AuthMethod;
   data: T;
 }
 
@@ -324,11 +336,193 @@ export interface ResendOtpResponse {
 // Specific Registration Data Payloads (simplified for API)
 // These should mirror the Zod schemas but be flattened for API consumption
 
-export interface IndividualRegistrationApiData {
-  firstName: string;
-  lastName: string;
+// Base registration data interface matching the validation schema
+export interface BaseRegistrationData {
+  name: string;
   email?: string;
-  phoneNumber?: string;
+  phone: string;
+  password: string;
+  password_confirmation: string;
+  country_id?: string;
+  commercial_register_file?: File;
+}
+
+// Individual registration data
+export interface IndividualRegistrationData extends BaseRegistrationData {
+  national_id: string;
+}
+
+// Supplier registration data
+export interface SupplierRegistrationData extends BaseRegistrationData {
+  business_name: string;
+  commercial_register_number: string;
+}
+
+// Engineering office registration data
+export interface EngineeringOfficeRegistrationData
+  extends BaseRegistrationData {
+  business_name: string;
+  license_number: string;
+  commercial_register_number: string;
+}
+
+// Freelance engineer registration data
+export interface FreelanceEngineerRegistrationData
+  extends BaseRegistrationData {
+  engineers_association_number: string;
+}
+
+// Contractor registration data
+export interface ContractorRegistrationData extends BaseRegistrationData {
+  business_name: string;
+  commercial_register_number: string;
+}
+
+// Organization registration data
+export interface OrganizationRegistrationData extends BaseRegistrationData {
+  business_name: string;
+  commercial_register_number: string;
+}
+
+// Governmental registration data
+export interface GovernmentalRegistrationData extends BaseRegistrationData {
+  commercial_register_number: string;
+}
+
+// Union type for all registration data
+export type RegistrationData =
+  | IndividualRegistrationData
+  | SupplierRegistrationData
+  | EngineeringOfficeRegistrationData
+  | FreelanceEngineerRegistrationData
+  | ContractorRegistrationData
+  | OrganizationRegistrationData
+  | GovernmentalRegistrationData;
+
+// Dynamic registration data type that includes all possible fields
+export interface DynamicRegistrationData {
+  // Base fields
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  password_confirmation: string;
+  country_id: string;
+  commercial_register_file?: File;
+
+  // Role-specific fields (all optional, will be populated based on role)
+  national_id?: string;
+  business_name?: string;
+  commercial_register_number?: string;
+  license_number?: string;
+  engineers_association_number?: string;
+}
+
+// API request data type for registration
+export interface RegistrationApiData {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  password_confirmation: string;
+  user_type: string;
+  countryOfResidence?: string;
+
+  // Role-specific fields
+  national_id?: string;
+  business_name?: string;
+  commercial_register_number?: string;
+  license_number?: string;
+  engineers_association_number?: string;
+  commercial_register_file?: File;
+}
+
+// Dynamic form data type for form handling
+export interface DynamicFormData {
+  // Base fields (required)
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  password_confirmation: string;
+  country_id: string;
+  commercial_register_file?: File;
+
+  // Role-specific fields (all optional, will be populated based on role)
+  national_id?: string;
+  business_name?: string;
+  commercial_register_number?: string;
+  license_number?: string;
+  engineers_association_number?: string;
+}
+
+// Type guards for registration data
+export const isIndividualRegistrationData = (
+  data: RegistrationData
+): data is IndividualRegistrationData => {
+  return "national_id" in data;
+};
+
+export const isSupplierRegistrationData = (
+  data: RegistrationData
+): data is SupplierRegistrationData => {
+  return (
+    "commercial_register_number" in data &&
+    !("license_number" in data) &&
+    !("engineers_association_number" in data)
+  );
+};
+
+export const isEngineeringOfficeRegistrationData = (
+  data: RegistrationData
+): data is EngineeringOfficeRegistrationData => {
+  return "license_number" in data && "commercial_register_number" in data;
+};
+
+export const isFreelanceEngineerRegistrationData = (
+  data: RegistrationData
+): data is FreelanceEngineerRegistrationData => {
+  return "engineers_association_number" in data;
+};
+
+export const isContractorRegistrationData = (
+  data: RegistrationData
+): data is ContractorRegistrationData => {
+  return (
+    "commercial_register_number" in data &&
+    !("license_number" in data) &&
+    !("engineers_association_number" in data) &&
+    !("national_id" in data)
+  );
+};
+
+export const isOrganizationRegistrationData = (
+  data: RegistrationData
+): data is OrganizationRegistrationData => {
+  return (
+    "commercial_register_number" in data &&
+    !("license_number" in data) &&
+    !("engineers_association_number" in data) &&
+    !("national_id" in data)
+  );
+};
+
+export const isGovernmentalRegistrationData = (
+  data: RegistrationData
+): data is GovernmentalRegistrationData => {
+  return (
+    "commercial_register_number" in data &&
+    !("license_number" in data) &&
+    !("engineers_association_number" in data) &&
+    !("national_id" in data)
+  );
+};
+
+// Legacy API data interface (for backward compatibility)
+export interface IndividualRegistrationApiData {
+  name: string;
+  email?: string;
+  phone: string;
   password?: string;
   countryOfResidence: string;
   nationalId?: string; // For API, this would be a FormData entry
@@ -488,6 +682,40 @@ export interface CustomInputProps {
   [key: string]: unknown;
 }
 
+// Validation-related types
+export interface ValidationError {
+  field: string;
+  message: string;
+  code?: string;
+}
+
+export interface ValidationResult {
+  success: boolean;
+  errors: ValidationError[];
+  data?: any;
+}
+
+// Form field types for better type safety
+export type FormFieldName =
+  | "name"
+  | "email"
+  | "phone"
+  | "password"
+  | "password_confirmation"
+  | "national_id"
+  | "commercial_register_number"
+  | "license_number"
+  | "engineers_association_number"
+  | "country_id"
+  | "commercial_register_file";
+
+export type ValidationFieldName =
+  | FormFieldName
+  | "firstName"
+  | "lastName"
+  | "phoneNumber"
+  | "confirmPassword";
+
 // OTP Verification Types
 export interface OTPVerificationProps {
   personalInfo: PersonalInfo;
@@ -510,10 +738,12 @@ export interface UserRoleOption {
 // Registration Store Interface
 export interface RegistrationStore {
   currentStep: string;
+  currentRole: RegistrationRole | null;
   authMethod: AuthMethod | null;
   personalInfo: PersonalInfo;
   phoneInfo?: Record<string, unknown>;
   thirdPartyInfo?: ThirdPartyAuthData;
+  registrationData?: RegistrationData;
   isLoading: boolean;
   error: string | null;
 }

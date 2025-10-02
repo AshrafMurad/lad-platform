@@ -33,6 +33,7 @@ export const getProjectValidationMessages = (t: (key: string) => string) => ({
     required: t("feedback.validation.area_sqm.required"),
   },
   description: {
+    largeMinLength: t("feedback.validation.description.largeMinLength"),
     minLength: t("feedback.validation.description.minLength"),
     required: t("feedback.validation.description.required"),
   },
@@ -108,8 +109,8 @@ export const getProjectValidationMessages = (t: (key: string) => string) => ({
 
   publish: {
     offers_window_days: {
-    minValue: t("feedback.validation.publish.offers_window_days.minValue"),
-    required: t("feedback.validation.publish.offers_window_days.required"),
+      minValue: t("feedback.validation.publish.offers_window_days.minValue"),
+      required: t("feedback.validation.publish.offers_window_days.required"),
     },
   },
 });

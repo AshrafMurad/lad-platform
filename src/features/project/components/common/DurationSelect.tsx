@@ -25,7 +25,7 @@ const DurationSelect = ({
 }: DurationSelectProps) => {
   const t = useTranslations("");
   return (
-    <Select  value={value} onValueChange={onSelect}>
+    <Select value={value} onValueChange={onSelect}>
       <SelectTrigger size="sm" className={cn("w-fit", triggerClassName)}>
         <SelectValue
           placeholder={placeholder ?? t("common.select.duration")}
@@ -33,10 +33,9 @@ const DurationSelect = ({
         />
       </SelectTrigger>
       <SelectContent className="w-full">
-        <SelectItem value={"day"}>{t("common.select.day")}</SelectItem>
-        <SelectItem value={"week"}>{t("common.select.week")}</SelectItem>
-        <SelectItem value={"month"}>{t("common.select.month")}</SelectItem>
-        <SelectItem value={"year"}>{t("common.select.year")}</SelectItem>
+        <SelectItem value={"DAY"}>{t("common.select.day")}</SelectItem>
+        <SelectItem value={"WEEK"}>{t("common.select.week")}</SelectItem>
+        <SelectItem value={"MONTH"}>{t("common.select.month")}</SelectItem>
       </SelectContent>
     </Select>
   );

@@ -173,18 +173,29 @@ export const useCreateProject = () => {
 
   const submitEssentialInfo = useCallback(
     async (data: {
-      name: string;
-      type: number;
+      title: string;
+      project_type_id: number;
       city: string;
       district: string;
       location: string;
       budget: number;
       budget_unit: string;
-      duration: number;
+      duration_value: number;
       duration_unit: string;
       area_sqm: number;
       description: string;
     }) => {
+      // Prevent double submission
+      if (isLoading) {
+        console.log(
+          "⚠️ Submission already in progress, ignoring duplicate call"
+        );
+        return {
+          success: false,
+          message: "Submission already in progress",
+        };
+      }
+
       try {
         clearError();
         setLoading(true);
@@ -207,7 +218,7 @@ export const useCreateProject = () => {
             "✅ Step already completed with no changes, moving to next step"
           );
           setCurrentStep(currentStep + 1);
-          setLoading(false); 
+          setLoading(false);
           return {
             success: true,
             message: "No changes detected, navigating to next step",
@@ -219,7 +230,7 @@ export const useCreateProject = () => {
           );
           setCompletedSteps(currentStep);
           setCurrentStep(currentStep + 1);
-          setLoading(false); 
+          setLoading(false);
           return {
             success: true,
             message: "Step completed, navigating to next step",
@@ -227,15 +238,16 @@ export const useCreateProject = () => {
         }
 
         const essentialInfoData: ProjectEssentialInfo = {
-          name: data.name,
-          type:
-            projectTypes?.filter((type) => type.id === data.type)[0].id || 0,
+          title: data.title,
+          project_type_id:
+            projectTypes?.filter((type) => type.id === data.project_type_id)[0]
+              .id || 0,
           city: data.city,
           district: data.district,
           location: data.location,
           budget: data.budget,
           budget_unit: data.budget_unit,
-          duration: data.duration,
+          duration_value: data.duration_value,
           duration_unit: data.duration_unit,
           area_sqm: data.area_sqm,
           description: data.description,
@@ -243,12 +255,17 @@ export const useCreateProject = () => {
 
         let response: any;
         if (shouldCreate) {
+          console.log("🚀 Making API call to create project...");
           response = await projectApi.createEssentialInfoProject(
             essentialInfoData
           );
+          console.log("✅ API call completed with response:", response);
           if (response.success) {
-            const newProjectId = response.data.projectId;
-            const newProject = response.data.project;
+            // Handle real API response format
+            const projectData = response.data;
+            const newProjectId = projectData.id || projectData.projectId;
+            const newProject = projectData.project || projectData;
+
             if (shouldCreate) {
               const projectIdToRedirect = newProjectId;
               // Update URL without full page reload to avoid double API call
@@ -269,6 +286,8 @@ export const useCreateProject = () => {
               updated_at: new Date().toISOString(),
             };
             addProject(userProject);
+          } else {
+            console.error("❌ Project creation failed:", response.message);
           }
         } else {
           if (!projectId) {
@@ -297,17 +316,20 @@ export const useCreateProject = () => {
           };
         } else {
           console.error("API Error:", response.message);
+          const errorMessage =
+            response.message || "Failed to save essential info";
           setLoading(false); // Reset loading state
-          return { success: false, message: response.message || "API Error" };
+          return { success: false, message: errorMessage };
         }
       } catch (error) {
         console.error("❌ Error:", error);
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred";
         return {
           success: false,
-          message:
-            error instanceof Error
-              ? error.message
-              : "An unexpected error occurred",
+          message: errorMessage,
         };
       } finally {
         setLoading(false);

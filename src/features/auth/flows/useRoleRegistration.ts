@@ -1,6 +1,11 @@
 import { useCallback } from "react";
 import { useAuthStore } from "@auth/store/authStore";
-import { AuthUser, PersonalInfo, RoleSpecificData } from "@auth/types/auth";
+import {
+  AuthUser,
+  PersonalInfo,
+  RoleSpecificData,
+  DynamicRegistrationData,
+} from "@auth/types/auth";
 import { authApi } from "@auth/services/authApi";
 import { createValidationSchemas } from "@auth/utils/validation";
 import { useTranslations } from "next-intl";
@@ -45,11 +50,32 @@ export const useRoleRegistration = () => {
     [store]
   );
 
-  // Schema getter
-  const getPersonalInfoSchema = useCallback(() => {
-    const validationSchemas = createValidationSchemas(t);
-    return validationSchemas.PersonalInfoSchema;
-  }, [t]);
+  // Schema getter - returns the appropriate schema based on role
+  const getPersonalInfoSchema = useCallback(
+    (role: string) => {
+      const validationSchemas = createValidationSchemas(t);
+
+      switch (role) {
+        case "individual":
+          return validationSchemas.individualRegistrationSchema;
+        case "supplier":
+          return validationSchemas.supplierRegistrationSchema;
+        case "engineering_office":
+          return validationSchemas.engineeringOfficeRegistrationSchema;
+        case "freelance_engineer":
+          return validationSchemas.freelanceEngineerRegistrationSchema;
+        case "contractor":
+          return validationSchemas.contractorRegistrationSchema;
+        case "organization":
+          return validationSchemas.organizationRegistrationSchema;
+        case "governmental":
+          return validationSchemas.governmentalRegistrationSchema;
+        default:
+          return validationSchemas.baseRegistrationSchema;
+      }
+    },
+    [t]
+  );
 
   // Unified form submission handler
   const handlePersonalInfoSubmit = useCallback(
@@ -58,19 +84,60 @@ export const useRoleRegistration = () => {
         store.setLoading(true);
         store.clearError();
 
+        // Prepare data based on role
+        const registrationData: DynamicRegistrationData = {
+          name: data.name!,
+          email: data.email!,
+          password: data.password!,
+          password_confirmation: data.password!,
+          phone: data.phone!,
+          country_id: data.country_id || "SA", // Default to Saudi Arabia
+        };
+
+        // Add role-specific fields
+        if (role === "individual") {
+          registrationData.national_id = data.national_id || "";
+        } else if (role === "supplier") {
+          registrationData.business_name = data.business_name || "";
+          registrationData.commercial_register_number =
+            data.commercial_register_number || "";
+          registrationData.commercial_register_file =
+            data.commercial_register_file;
+        } else if (role === "contractor") {
+          registrationData.business_name = data.business_name || "";
+          registrationData.commercial_register_number =
+            data.commercial_register_number || "";
+          registrationData.commercial_register_file =
+            data.commercial_register_file;
+        } else if (role === "engineering_office") {
+          registrationData.business_name = data.business_name || "";
+          registrationData.commercial_register_number =
+            data.commercial_register_number || "";
+          registrationData.license_number = data.license_number || "";
+          registrationData.commercial_register_file =
+            data.commercial_register_file;
+        } else if (role === "freelance_engineer") {
+          registrationData.engineers_association_number =
+            data.engineers_association_number || "";
+          registrationData.commercial_register_file =
+            data.commercial_register_file;
+        } else if (role === "organization") {
+          registrationData.business_name = data.business_name || "";
+          registrationData.commercial_register_number =
+            data.commercial_register_number || "";
+          registrationData.commercial_register_file =
+            data.commercial_register_file;
+        } else if (role === "governmental") {
+          registrationData.commercial_register_number =
+            data.commercial_register_number || "";
+        }
+
         let registrationResult = await authApi.register(
           {
             userType: store.currentRole!,
             role: store.currentRole!,
             authMethod: store.authMethod!,
-            data: {
-              firstName: data.firstName!,
-              lastName: data.lastName!,
-              email: data.email!,
-              password: data.password!,
-              phoneNumber: data.phoneNumber!,
-              countryOfResidence: "Saudi Arabia", // Default value, should be configurable
-            },
+            data: registrationData,
           },
           role
         );

@@ -82,47 +82,30 @@ export const projectApi = {
 
   createEssentialInfoProject: async (data: ProjectEssentialInfo) => {
     try {
-      const response = await new Promise((resolve) => {
-        setTimeout(() => {
-          const projectId = `proj_${Date.now()}`;
-          resolve({
-            success: true,
-            message: "Project created successfully",
-            data: {
-              projectId,
-              project: {
-                id: projectId,
-                essential_info: data,
-                classification: {
-                  id: 0,
-                  jobId: 0,
-                  workTypeId: 0,
-                  levelId: 0,
-                  notes: "",
-                },
-                documents: [],
-                status: { status: "in_progress" },
-                publish_settings: {
-                  notify_matching_contractors: false,
-                  notify_client_on_offer: false,
-                  offers_window_days: 0,
-                },
-                boq: {
-                  items: [],
-                  total_amount: 0,
-                },
-              },
-            },
-          });
-        }, 2000);
-      });
+      console.log("🚀 Creating project with data:", data);
 
-      return response;
-    } catch (error) {
-      console.error("Error creating project:", error);
+      const response = await api.post("/projects/owner", data);
+
+      console.log("✅ Project creation response:", response.data);
+
+      return {
+        success: true,
+        message: "Project created successfully",
+        data: response.data,
+      };
+    } catch (error: any) {
+      console.error("❌ Error creating project:", error);
+
+      // Handle different error response formats
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to create project";
+
       return {
         success: false,
-        message: "Failed to create project",
+        message: errorMessage,
         data: null,
       };
     }
@@ -132,25 +115,30 @@ export const projectApi = {
     data: ProjectEssentialInfo
   ) => {
     try {
-      const response = await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            success: true,
-            message: "Essential info updated successfully",
-            data: {
-              projectId,
-              essential_info: data,
-            },
-          });
-        }, 1500);
-      });
+      console.log("🔄 Updating project essential info:", { projectId, data });
 
-      return response;
-    } catch (error) {
-      console.error("Error updating project essential info:", error);
+      const response = await api.put(`/projects/owner/${projectId}`, data);
+
+      console.log("✅ Essential info update response:", response.data);
+
+      return {
+        success: true,
+        message: "Essential info updated successfully",
+        data: response.data,
+      };
+    } catch (error: any) {
+      console.error("❌ Error updating project essential info:", error);
+
+      // Handle different error response formats
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to update essential info";
+
       return {
         success: false,
-        message: "Failed to update essential info",
+        message: errorMessage,
         data: null,
       };
     }

@@ -44,9 +44,12 @@ const NavigationButtons = ({
       )}
       <Button
         onClick={onSubmit}
-        type="submit"
+        type="button"
         variant="default"
-        className={twMerge("w-full max-w-xs mx-auto", projectStatus.status === "pending_review" && "bg-p-7")}
+        className={twMerge(
+          "w-full max-w-xs mx-auto",
+          projectStatus.status === "pending_review" && "bg-p-7"
+        )}
       >
         {isLoading
           ? t("common.actions.loading")

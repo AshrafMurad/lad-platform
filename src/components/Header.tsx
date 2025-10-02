@@ -19,12 +19,12 @@ export default function Header() {
   const t = useTranslations("Header");
   const menuItems = [
     { name: t("home"), href: "/home" },
-    { name: t("aboutus"), href: "/aboutus" },
-    { name: t("services"), href: "/services" },
-    { name: t("projectGallery"), href: "/project-gallery" },
-    { name: t("contractorDirectory"), href: "/contractor-directory" },
-    { name: t("suppliers"), href: "/suppliers" },
-    { name: t("buildingMaterials"), href: "/building-materials" },
+    { name: t("aboutus"), href: "/home" },
+    { name: t("services"), href: "/home" },
+    { name: t("projectGallery"), href: "/home" },
+    { name: t("contractorDirectory"), href: "/home" },
+    { name: t("suppliers"), href: "/home" },
+    { name: t("buildingMaterials"), href: "/home" },
   ];
   React.useEffect(() => {
     const handleScroll = () => {
@@ -121,9 +121,7 @@ export default function Header() {
                 <Button
                   asChild
                   size="sm"
-                  className={cn(
-                    "h-10 rounded-full px-6 text-white"
-                  )}
+                  className={cn("h-10 rounded-full px-6 text-white")}
                 >
                   <Link href="/login">
                     <span>{t("login")}</span>

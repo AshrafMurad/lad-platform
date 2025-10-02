@@ -4,6 +4,9 @@ import {
   RegistrationRequest,
   RegistrationResponse,
   IndividualRegistrationApiData,
+  PersonalInfo,
+  DynamicRegistrationData,
+  RegistrationApiData,
   VerifyPhoneRequest,
   VerifyPhoneResponse,
   VerifyEmailRequest,
@@ -85,9 +88,7 @@ export const authApi = {
       return {
         success: false,
         message:
-          err.response?.data?.message ||
-          err.message ||
-          "Token refresh failed",
+          err.response?.data?.message || err.message || "Token refresh failed",
         errors: err.response?.data?.errors,
       };
     }
@@ -159,27 +160,96 @@ export const authApi = {
   },
   // Individual Registration
   register: async (
-    data: RegistrationRequest<IndividualRegistrationApiData>,
+    data: any,
     role: string
   ): Promise<ApiResponse<RegistrationResponse>> => {
-    console.log("API Call: registerIndividual", data);
-
     try {
-      // Transform the data to match backend expectations
-      const transformedData = {
-        name: `${data.data.firstName} ${data.data.lastName}`,
-        email: data.data.email,
-        password: data.data.password,
-        password_confirmation: data.data.password, // Assuming confirmPassword is the same
-        user_type: role.toLowerCase(),
-        phone: data.data.phoneNumber,
-        national_id: data.data.nationalId || "",
-      };
+      let response;
 
-      console.log("Transformed data being sent to API:", transformedData);
+      // Check if this is organization, freelance engineer, engineering office, contractor, or supplier registration (use FormData for file upload)
+      if (
+        role === "organization" ||
+        role === "freelance_engineer" ||
+        role === "engineering_office" ||
+        role === "contractor" ||
+        role === "supplier"
+      ) {
+        // Use FormData for file upload registration
+        const formData = new FormData();
+        formData.append("name", data.data.name || "");
+        formData.append("email", data.data.email || "");
+        formData.append("password", data.data.password || "");
+        formData.append("password_confirmation", data.data.password || "");
+        formData.append("user_type", role.toLowerCase());
+        formData.append("phone", data.data.phone || "");
 
-      const response = await api.post("/auth/register", transformedData);
-      console.log("API Response:", response.data);
+        // Add role-specific fields
+        if (role === "organization") {
+          formData.append("business_name", data.data.business_name || "");
+          formData.append(
+            "commercial_register_number",
+            data.data.commercial_register_number || ""
+          );
+        } else if (role === "freelance_engineer") {
+          formData.append(
+            "engineers_association_number",
+            data.data.engineers_association_number || ""
+          );
+        } else if (role === "engineering_office") {
+          formData.append("business_name", data.data.business_name || "");
+          formData.append(
+            "commercial_register_number",
+            data.data.commercial_register_number || ""
+          );
+          formData.append("license_number", data.data.license_number || "");
+        } else if (role === "contractor") {
+          formData.append("business_name", data.data.business_name || "");
+          formData.append(
+            "commercial_register_number",
+            data.data.commercial_register_number || ""
+          );
+        } else if (role === "supplier") {
+          formData.append("business_name", data.data.business_name || "");
+          formData.append(
+            "commercial_register_number",
+            data.data.commercial_register_number || ""
+          );
+        }
+
+        // Only append file if it exists
+        if (data.data.commercial_register_file) {
+          formData.append(
+            "commercial_register_file",
+            data.data.commercial_register_file
+          );
+        }
+
+        response = await api.post("/auth/register", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      } else {
+        // Transform the data to match backend expectations for other roles
+        const transformedData: RegistrationApiData = {
+          name: data.data.name || "",
+          email: data.data.email || "",
+          password: data.data.password || "",
+          password_confirmation: data.data.password || "",
+          user_type: role.toLowerCase(),
+          phone: data.data.phone || "",
+        };
+
+        // Add role-specific fields (only for roles that don't use FormData)
+        if (role === "individual") {
+          transformedData.national_id = data.data.national_id || "";
+        } else if (role === "governmental") {
+          transformedData.commercial_register_number =
+            data.data.commercial_register_number || "";
+        }
+
+        response = await api.post("/auth/register", transformedData);
+      }
 
       // Extract user data and tokens from the new response structure
       const userData = response.data?.response;
@@ -307,8 +377,7 @@ export const authApi = {
         return {
           success: false,
           message:
-              err.response.data.message ||
-            "Failed to resend email verification",
+            err.response.data.message || "Failed to resend email verification",
           errors: err.response.data.errors || {
             general: ["Failed to resend email verification"],
           },

@@ -18,14 +18,14 @@ export interface UserProject {
 }
 
 export interface ProjectEssentialInfo {
-  name: string;
-  type: number; // Just the ID, not the full object
+  title: string;
+  project_type_id: number; // Just the ID, not the full object
   city: string;
   district: string;
   location: string;
   budget: number;
   budget_unit: string;
-  duration: number;
+  duration_value: number;
   duration_unit: string;
   area_sqm: number;
   description: string;

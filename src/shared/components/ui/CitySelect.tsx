@@ -23,14 +23,16 @@ interface City {
 interface CitySelectProps {
   onCityChange?: (cityCode: string) => void;
   selectedCity?: string;
-  stateCode: string | null;
+  stateCode?: string | null;
   disabled?: boolean;
   className?: string;
   enableSearch?: boolean;
   placeholder?: string;
   label?: string;
+  hasIcon?: boolean;
   onBlur?: () => void;
   hasLabel?: boolean;
+  icon?: React.ComponentType<{ className?: string }>;
 }
 
 export const CitySelection: React.FC<CitySelectProps> = ({
@@ -44,6 +46,8 @@ export const CitySelection: React.FC<CitySelectProps> = ({
   label,
   onBlur,
   hasLabel = true,
+  hasIcon = true,
+  icon = MapPin,
 }) => {
   const t = useTranslations();
   const [cities, setCities] = useState<City[]>([]);
@@ -54,15 +58,16 @@ export const CitySelection: React.FC<CitySelectProps> = ({
   // Fetch cities when stateCode changes
   React.useEffect(() => {
     const fetchCities = async () => {
-      if (!stateCode) {
-        setCities([]);
-        setIsLoading(false);
-        return;
-      }
-
       setIsLoading(true);
       try {
-        const response = await globalApi.getCities(stateCode);
+        let response;
+        if (stateCode) {
+          // Fetch cities by state code
+          response = await globalApi.getCities(stateCode);
+        } else {
+          // Fetch all cities when no state code is provided
+          response = await globalApi.getAllCities();
+        }
         setCities(response.data || []);
         setIsLoading(false);
       } catch (error) {
@@ -378,7 +383,7 @@ export const CitySelection: React.FC<CitySelectProps> = ({
     return (
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <MapPin className="text-design-main p-1" />
+          {hasIcon && <MapPin className="text-design-main p-1" />}
           <label className="text-sm font-medium">
             {label || t("common.ui.selectCity")}
           </label>
@@ -401,16 +406,16 @@ export const CitySelection: React.FC<CitySelectProps> = ({
             placeholder ||
             (cities && cities.length > 0
               ? t("common.ui.selectCity")
-              : stateCode
+              : isLoading
               ? t("common.ui.loadingCities")
-              : t("common.ui.selectStateFirst"))
+              : t("common.ui.selectCity"))
           }
           label={label || t("common.ui.selectCity")}
           data={cities || []}
           onSelect={handleCityChange}
           selectedValue={selectedCity}
-          disabled={disabled || isLoading || !stateCode || cities.length === 0}
-          icon={MapPin}
+          disabled={disabled || isLoading || cities.length === 0}
+          icon={hasIcon ? MapPin : undefined}
           onClear={() => {
             handleCityChange("");
             onBlur?.();
@@ -420,7 +425,7 @@ export const CitySelection: React.FC<CitySelectProps> = ({
       ) : (
         <div key="city-select" className="space-y-2">
           <div className="flex items-center gap-2">
-            <MapPin className="text-design-main p-1" />
+            {hasIcon && <MapPin className="text-design-main p-1" />}
             <label className="text-sm font-medium">
               {label || t("common.ui.selectCity")}
             </label>
@@ -429,9 +434,9 @@ export const CitySelection: React.FC<CitySelectProps> = ({
             <span className="text-muted-foreground">
               {cities && cities.length > 0
                 ? placeholder || t("common.ui.selectCity")
-                : stateCode
+                : isLoading
                 ? t("common.ui.loadingCities")
-                : t("common.ui.selectStateFirst")}
+                : t("common.ui.selectCity")}
             </span>
           </div>
         </div>

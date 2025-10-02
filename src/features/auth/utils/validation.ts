@@ -1,11 +1,16 @@
 import { z } from "zod";
 import { getValidationMessages } from "./validationMessages";
 
+// Regex patterns
+const nameRegex = /^[\u0600-\u06FFa-zA-Z\s]+$/; // Arabic and English characters only
+const saPhoneRegex = /^05[0-9]{8}$/; // Saudi phone number format: 05XXXXXXXX (local format only)
+const nationalIdRegex = /^[0-9]{10}$/; // 10 digits
+const commercialRegisterRegex = /^[0-9]{10}$/; // 10 digits
+
 // Factory function to create validation schemas with translation support
 export const createValidationSchemas = (t: (key: string) => string) => {
   const messages = getValidationMessages(t);
 
-  // Enhanced password validation with case requirements
   const passwordValidation = z
     .string()
     .min(8, messages.password.minLength)
@@ -18,145 +23,233 @@ export const createValidationSchemas = (t: (key: string) => string) => {
     .refine((password) => /[!@#$%^&*(),.?":{}|<>]/.test(password), {
       message: messages.password.symbol,
     });
-
-  // Optional password validation for third-party auth
-  const optionalPasswordValidation = z
-    .string()
-    .optional()
-    .refine(
-      (password) => {
-        if (!password) return true; // Allow empty for optional passwords
-        return password.length >= 8;
-      },
-      {
-        message: messages.password.minLength,
-      }
-    )
-    .refine(
-      (password) => {
-        if (!password) return true; // Allow empty for optional passwords
-        return /[a-z]/.test(password);
-      },
-      {
-        message: messages.password.lowercase,
-      }
-    )
-    .refine(
-      (password) => {
-        if (!password) return true; // Allow empty for optional passwords
-        return /[A-Z]/.test(password);
-      },
-      {
-        message: messages.password.uppercase,
-      }
-    )
-    .refine(
-      (password) => {
-        if (!password) return true; // Allow empty for optional passwords
-        return /[!@#$%^&*(),.?":{}|<>]/.test(password);
-      },
-      {
-        message: messages.password.symbol,
-      }
-    );
-
-  const EmailLoginSchema = z.object({
-    email: z.string().email(messages.email.invalid),
-    password: z.string().min(6, messages.password.minLength),
-  });
-
-  // Common validation schemas for reuse
-  const validationSchemas = {
-    name: z.string().min(2, messages.firstName.minLength),
-    email: z.string().email(messages.email.invalid),
-    phone: z.string().min(9, messages.phoneNumber.minLength),
-  };
-
-  const PhoneLoginSchema = z.object({
-    phoneNumber: z.string().min(6, messages.phoneNumber.minLength),
-    // Assuming OTP is used for login instead of a password for phone
-  });
-
+  const baseRegistrationSchema = z
+    .object({
+      name: z
+        .string({ error: messages.name.required })
+        .min(2, messages.name.minLength)
+        .max(255, messages.name.maxLength)
+        .regex(nameRegex, messages.name.invalid),
+      email: z
+        .string({ error: messages.email.required })
+        .email(messages.email.invalid)
+        .max(255, messages.email.maxLength),
+      phone: z
+        .string({ error: messages.phone.required })
+        .regex(saPhoneRegex, messages.phone.invalid),
+      password: passwordValidation,
+      password_confirmation: z.string({
+        error: messages.confirmPassword.required,
+      }),
+      country_id: z
+        .string({ error: messages.country.required })
+        .max(100)
+        .optional(),
+      commercial_register_file: z.any().optional(),
+    })
+    .refine((data) => data.password === data.password_confirmation, {
+      message: messages.confirmPassword.mismatch,
+      path: ["password_confirmation"],
+    });
   // Unified schema for individual personal information (replaces individualUnifiedPersonalInfoSchema)
-  const PersonalInfoSchema = z
-    .object({
-      firstName: z.string().min(2, messages.firstName.minLength),
-      lastName: z.string().min(2, messages.lastName.minLength),
-      phoneNumber: z.string().min(9, messages.phoneNumber.minLength), // Made optional for email/third-party
-      email: z.string().email(messages.email.invalid),
-      password: passwordValidation,
-      confirmPassword: z.string(),
-      agreeToTerms: z.boolean().refine((val) => val === true, {
-        message: messages.terms.required,
-      }),
-    })
-    .refine(
-      (data) => {
-        // Password validation only for email and phone auth methods if present
-        if (
-          (data.password || data.confirmPassword) &&
-          data.password !== data.confirmPassword
-        ) {
-          return false;
+  const individualRegistrationSchema = baseRegistrationSchema.extend({
+    national_id: z
+      .string({ error: messages.nationalId.required })
+      .regex(nationalIdRegex, messages.nationalId.invalid),
+  });
+
+  const supplierRegistrationSchema = baseRegistrationSchema.extend({
+    business_name: z
+      .string({ error: messages.businessName.required })
+      .min(2, messages.businessName.minLength)
+      .max(255, messages.businessName.maxLength),
+    commercial_register_number: z
+      .string({ error: messages.commercialRegisterNumber.required })
+      .regex(
+        commercialRegisterRegex,
+        messages.commercialRegisterNumber.invalid
+      ),
+    commercial_register_file: z
+      .any()
+      .refine((file) => file instanceof File, {
+        message: messages.commercialRegisterFile.required,
+      })
+      .refine((file) => !file || file.size <= 8 * 1024 * 1024, {
+        message: messages.commercialRegisterFile.maxSize,
+      })
+      .refine(
+        (file) => {
+          if (!file) return true;
+          const allowedTypes = [
+            "application/pdf",
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "image/webp",
+          ];
+          return allowedTypes.includes(file.type);
+        },
+        {
+          message: messages.commercialRegisterFile.invalidType,
         }
-        return true;
-      },
-      {
-        message: messages.confirmPassword.mismatch,
-        path: ["confirmPassword"],
-      }
-    );
-
-  // Specific schemas for different authentication methods (can be derived or separate)
-  // Email-based registration/login
-  const IndividualEmailRegistrationSchema = PersonalInfoSchema.extend({
-    email: z.string().email(messages.email.invalid),
-    password: passwordValidation,
-    confirmPassword: z.string(),
-    phoneNumber: z.string().min(9, messages.phoneNumber.minLength),
+      ),
   });
 
-  // Phone-based registration/login
-  const IndividualPhoneRegistrationSchema = PersonalInfoSchema.extend({
-    phoneNumber: z.string().min(9, messages.phoneNumber.minLength),
-    password: passwordValidation,
-    confirmPassword: z.string(),
-  });
-
-  const IndividualThirdPartyRegistrationSchema = PersonalInfoSchema.extend({
-    email: z.string().email(messages.email.invalid),
-    phoneNumber: z.string().optional(),
-    password: z.string().optional(),
-    confirmPassword: z.string().optional(),
-  });
-
-  // Social Login Form Schema - for completing profile after social auth
-  const SocialLoginFormSchema = z
-    .object({
-      firstName: z.string().min(2, messages.firstName.minLength),
-      lastName: z.string().min(2, messages.lastName.minLength),
-      email: z.string().email(messages.email.invalid),
-      phoneNumber: z.string().min(9, messages.phoneNumber.minLength),
-      password: passwordValidation,
-      confirmPassword: z.string(),
-      agreeToTerms: z.boolean().refine((val) => val === true, {
-        message: messages.terms.required,
-      }),
-    })
-    .refine(
-      (data) => {
-        if (data.password !== data.confirmPassword) {
-          return false;
+  const engineeringOfficeRegistrationSchema = baseRegistrationSchema.extend({
+    business_name: z
+      .string({ error: messages.businessName.required })
+      .min(2, messages.businessName.minLength)
+      .max(255, messages.businessName.maxLength),
+    license_number: z
+      .string({ error: messages.licenseNumber.required })
+      .min(1, messages.licenseNumber.required)
+      .max(50, messages.licenseNumber.maxLength),
+    commercial_register_number: z
+      .string({ error: messages.commercialRegisterNumber.required })
+      .regex(
+        commercialRegisterRegex,
+        messages.commercialRegisterNumber.invalid
+      ),
+    commercial_register_file: z
+      .any()
+      .refine((file) => file instanceof File, {
+        message: messages.commercialRegisterFile.required,
+      })
+      .refine((file) => !file || file.size <= 8 * 1024 * 1024, {
+        message: messages.commercialRegisterFile.maxSize,
+      })
+      .refine(
+        (file) => {
+          if (!file) return true;
+          const allowedTypes = [
+            "application/pdf",
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "image/webp",
+          ];
+          return allowedTypes.includes(file.type);
+        },
+        {
+          message: messages.commercialRegisterFile.invalidType,
         }
-        return true;
-      },
-      {
-        message: messages.confirmPassword.mismatch,
-        path: ["confirmPassword"],
-      }
-    );
+      ),
+  });
 
-  // OTP Verification Schema
+  const freelanceEngineerRegistrationSchema = baseRegistrationSchema.extend({
+    engineers_association_number: z
+      .string({ error: messages.engineersAssociationNumber.required })
+      .max(50, messages.engineersAssociationNumber.maxLength)
+      .min(1, messages.engineersAssociationNumber.required),
+    commercial_register_file: z
+      .any()
+      .refine((file) => file instanceof File, {
+        message: messages.commercialRegisterFile.required,
+      })
+      .refine((file) => !file || file.size <= 8 * 1024 * 1024, {
+        message: messages.commercialRegisterFile.maxSize,
+      })
+      .refine(
+        (file) => {
+          if (!file) return true;
+          const allowedTypes = [
+            "application/pdf",
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "image/webp",
+          ];
+          return allowedTypes.includes(file.type);
+        },
+        {
+          message: messages.commercialRegisterFile.invalidType,
+        }
+      ),
+  });
+
+  const contractorRegistrationSchema = baseRegistrationSchema.extend({
+    business_name: z
+      .string({ error: messages.businessName.required })
+      .min(2, messages.businessName.minLength)
+      .max(255, messages.businessName.maxLength),
+    commercial_register_number: z
+      .string({ error: messages.commercialRegisterNumber.required })
+      .regex(
+        commercialRegisterRegex,
+        messages.commercialRegisterNumber.invalid
+      ),
+    commercial_register_file: z
+      .any()
+      .refine((file) => file instanceof File, {
+        message: messages.commercialRegisterFile.required,
+      })
+      .refine((file) => !file || file.size <= 8 * 1024 * 1024, {
+        message: messages.commercialRegisterFile.maxSize,
+      })
+      .refine(
+        (file) => {
+          if (!file) return true;
+          const allowedTypes = [
+            "application/pdf",
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "image/webp",
+          ];
+          return allowedTypes.includes(file.type);
+        },
+        {
+          message: messages.commercialRegisterFile.invalidType,
+        }
+      ),
+  });
+
+  const governmentalRegistrationSchema = baseRegistrationSchema.extend({
+    commercial_register_number: z
+      .string({ error: messages.commercialRegisterNumber.required })
+      .regex(
+        commercialRegisterRegex,
+        messages.commercialRegisterNumber.invalid
+      ),
+  });
+
+  const organizationRegistrationSchema = baseRegistrationSchema.extend({
+    business_name: z
+      .string({ error: messages.businessName.required })
+      .min(2, messages.businessName.minLength)
+      .max(255, messages.businessName.maxLength),
+    commercial_register_number: z
+      .string({ error: messages.commercialRegisterNumber.required })
+      .regex(
+        commercialRegisterRegex,
+        messages.commercialRegisterNumber.invalid
+      ),
+    commercial_register_file: z
+      .any()
+      .refine((file) => file instanceof File, {
+        message: messages.commercialRegisterFile.required,
+      })
+      .refine((file) => !file || file.size <= 8 * 1024 * 1024, {
+        message: messages.commercialRegisterFile.maxSize,
+      })
+      .refine(
+        (file) => {
+          if (!file) return true;
+          const allowedTypes = [
+            "application/pdf",
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "image/webp",
+          ];
+          return allowedTypes.includes(file.type);
+        },
+        {
+          message: messages.commercialRegisterFile.invalidType,
+        }
+      ),
+  });
+
   const OTPVerificationSchema = z.object({
     otp: z.string().length(6, { message: messages.otp.length }),
   });
@@ -190,16 +283,17 @@ export const createValidationSchemas = (t: (key: string) => string) => {
   });
 
   return {
-    EmailLoginSchema,
-    PhoneLoginSchema,
-    PersonalInfoSchema,
-    IndividualEmailRegistrationSchema,
-    IndividualPhoneRegistrationSchema,
-    IndividualThirdPartyRegistrationSchema,
-    SocialLoginFormSchema,
+    individualRegistrationSchema,
+    organizationRegistrationSchema,
+    supplierRegistrationSchema,
+    engineeringOfficeRegistrationSchema,
+    freelanceEngineerRegistrationSchema,
+    contractorRegistrationSchema,
+    governmentalRegistrationSchema,
     OTPVerificationSchema,
     PasswordResetSchema,
     NewPasswordSchema,
     passwordResetSchema,
+    baseRegistrationSchema,
   };
 };

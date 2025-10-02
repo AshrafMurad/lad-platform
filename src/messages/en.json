@@ -7,6 +7,7 @@
       "back": "Back",
       "next": "Next",
       "previous": "Previous",
+      "morePages": "More pages",
       "cancel": "Cancel",
       "save": "Save",
       "saving": "Saving...",
@@ -485,11 +486,17 @@
       "thirdPartyDescription": "Please provide additional information to complete your profile",
       "firstName": "First Name",
       "lastName": "Last Name",
+      "fullName": "Full Name",
       "email": "Email",
       "phoneNumber": "Phone Number",
       "password": "Password",
       "confirmPassword": "Confirm Password",
       "nationalId": "National ID",
+      "commercialRegisterNumber": "Commercial Register Number",
+      "licenseNumber": "License Number",
+      "engineersAssociationNumber": "Engineers Association Number",
+      "businessName": "Business Name",
+      "commercialRegisterFile": "Commercial Register File",
       "continue": "Continue"
     },
     "terms": {
@@ -855,9 +862,13 @@
         "description": "Update your basic information and contact details",
         "firstName": "First Name",
         "lastName": "Last Name",
+        "fullName": "Full Name",
         "email": "Email",
         "phoneNumber": "Phone Number",
         "nationalId": "National ID",
+        "commercialRegisterNumber": "Commercial Register Number",
+        "licenseNumber": "License Number",
+        "engineersAssociationNumber": "Engineers Association Number",
         "country": "Country",
         "city": "City",
         "state": "State",
@@ -1519,7 +1530,14 @@
       "area_sqm": "Area (sqm)",
       "area_sqmPlaceholder": "Enter area (sqm)",
       "description": "Description",
-      "descriptionPlaceholder": "Enter project description"
+      "descriptionPlaceholder": "Enter project description",
+      "success": "Essential information saved successfully!",
+      "error": {
+        "generic": "Failed to save essential information. Please try again.",
+        "unexpected": "An unexpected error occurred. Please try again.",
+        "network": "Network error. Please check your connection and try again.",
+        "validation": "Please check your input and try again."
+      }
     },
     "step2": {
       "title": "Select Executing Entity",
@@ -1724,6 +1742,19 @@
         "required": "Engineers association number is required",
         "maxLength": "Engineers association number must not exceed 50 characters"
       },
+      "country": {
+        "required": "Country is required"
+      },
+      "businessName": {
+        "required": "Business name is required",
+        "minLength": "Business name must be at least 2 characters",
+        "maxLength": "Business name must not exceed 255 characters"
+      },
+      "commercialRegisterFile": {
+        "required": "Commercial register file is required",
+        "maxSize": "File size must be less than 8MB",
+        "invalidType": "File must be PDF, JPG, JPEG, PNG, or WEBP"
+      },
       "aboutMe": {
         "required": "About me is required",
         "maxLength": "About me must not exceed 1000 characters"
@@ -1749,6 +1780,24 @@
       },
       "otp": {
         "length": "OTP must be 6 digits"
+      },
+      "name": {
+        "required": "Name is required",
+        "minLength": "Name must be at least 2 characters",
+        "maxLength": "Name must not exceed 255 characters",
+        "invalid": "Name must contain only Arabic or English characters"
+      },
+      "phone": {
+        "required": "Phone number is required",
+        "invalid": "Invalid phone number. Must be a Saudi number in format 05XXXXXXXX"
+      },
+      "commercialRegisterNumber": {
+        "required": "Commercial register number is required",
+        "invalid": "Commercial register number must be 10 digits"
+      },
+      "licenseNumber": {
+        "required": "License number is required",
+        "maxLength": "License number is too long"
       },
       "organizationName": {
         "required": "Organization name is required"
@@ -1959,7 +2008,8 @@
       },
       "description": {
         "required": "Please enter project description",
-        "minLength": "Description must be at least 2 characters"
+        "minLength": "Description must be at least 2 characters",
+        "largeMinLength": "Description must be at least 20 characters"
       },
       "jobId": {
         "required": "Please select job"
@@ -2090,6 +2140,69 @@
       "searchAndFilters": "Search & Filters",
       "searchPlaceholder": "Search products...",
       "allCategories": "All Categories"
+  "projectsList": {
+    "title": "My Projects",
+    "subtitle": "Manage and track your construction projects",
+    "loading": "Loading projects...",
+    "emptyState": {
+      "title": "No projects yet",
+      "description": "Get started by creating your first project",
+      "createButton": "Create New Project"
+    },
+    "projectCard": {
+      "status": {
+        "notStarted": "Not Started",
+        "inProgress": "In Progress",
+        "completed": "Completed"
+      },
+      "details": {
+        "location": "Location",
+        "budget": "Budget",
+        "duration": "Duration",
+        "area": "Area"
+      },
+      "progress": {
+        "label": "Progress",
+        "steps": "steps",
+        "nextStep": "Next"
+      },
+      "actions": {
+        "edit": "Edit",
+        "view": "View"
+      }
+    },
+    "projectTypes": {
+      "1": "Residential Building",
+      "2": "Commercial Building",
+      "3": "Industrial Building",
+      "4": "Infrastructure",
+      "unknown": "Unknown"
+    },
+    "steps": {
+      "essentialInfo": "Essential Information",
+      "classification": "Classification",
+      "documents": "Documents",
+      "boq": "BOQ",
+      "publishSettings": "Publish Settings",
+      "completed": "Completed"
+    },
+    "tabs": {
+      "all": "All Projects",
+      "inProgress": "In Progress",
+      "draft": "Draft",
+      "pendingOffers": "Pending Offers",
+      "pendingReview": "Pending Review",
+      "pendingSigning": "Pending Signing",
+      "completed": "Completed"
+    },
+    "pagination": {
+      "showing": "Showing",
+      "of": "of",
+      "results": "results",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page",
+      "goToPage": "Go to page"
     }
   }
 }

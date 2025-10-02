@@ -4,7 +4,6 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@shared/components/ui/button";
-import { PhoneInput } from "@auth/components/phone-input/PhoneInput";
 import {
   Card,
   CardContent,
@@ -38,12 +37,14 @@ import {
   getPasswordStrengthText,
 } from "../../utils/getPasswordStrength";
 import { useTranslations } from "next-intl";
-import { E164Number } from "libphonenumber-js";
+import { createValidationSchemas } from "@auth/utils/validation";
+import { RegistrationRole } from "@auth/types/auth";
+import { FileUpload } from "@/features/auth/components/file-upload";
+import { DynamicFormData } from "@/features/auth/types/auth";
 
 const CombinedRegistrationForm: React.FC<{ role: string }> = ({ role }) => {
   const store = useAuthStore();
-  const { handlePersonalInfoSubmit, getPersonalInfoSchema } =
-    useRoleRegistration();
+  const { handlePersonalInfoSubmit } = useRoleRegistration();
   const { signInWithGoogle, lastResult, clearLastResult } = useGoogleAuth();
   const t = useTranslations("");
   const commonT = useTranslations("common");
@@ -65,31 +66,81 @@ const CombinedRegistrationForm: React.FC<{ role: string }> = ({ role }) => {
     setShowConfirmPassword,
   } = store;
 
-  const schema = getPersonalInfoSchema();
+  // Get the appropriate validation schema based on role
+  const validationSchemas = createValidationSchemas(t);
+  const getSchemaForRole = (role: string) => {
+    switch (role as RegistrationRole) {
+      case "individual":
+        return validationSchemas.individualRegistrationSchema;
+      case "supplier":
+        return validationSchemas.supplierRegistrationSchema;
+      case "engineering_office":
+        return validationSchemas.engineeringOfficeRegistrationSchema;
+      case "freelance_engineer":
+        return validationSchemas.freelanceEngineerRegistrationSchema;
+      case "contractor":
+        return validationSchemas.contractorRegistrationSchema;
+      case "organization":
+        return validationSchemas.organizationRegistrationSchema;
+      default:
+        return validationSchemas.baseRegistrationSchema;
+    }
+  };
 
-  const form = useForm<z.infer<typeof schema>>({
+  const schema = getSchemaForRole(role);
+
+  const form = useForm<any>({
     resolver: zodResolver(schema),
+    mode: "onBlur", // Enable real-time validation
     defaultValues: {
-      firstName: "",
-      lastName: "",
+      name: "",
       email: "",
-      phoneNumber: "",
+      phone: "",
       password: "",
-      confirmPassword: "",
-      agreeToTerms: false,
+      password_confirmation: "",
+      country_id: "",
+      // Role-specific fields
+      ...(role === "individual" && { national_id: "" }),
+      ...(role === "supplier" && {
+        business_name: "",
+        commercial_register_number: "",
+        commercial_register_file: undefined,
+      }),
+      ...(role === "engineering_office" && {
+        business_name: "",
+        license_number: "",
+        commercial_register_number: "",
+        commercial_register_file: undefined,
+      }),
+      ...(role === "freelance_engineer" && {
+        engineers_association_number: "",
+        commercial_register_file: undefined,
+      }),
+      ...(role === "contractor" && {
+        business_name: "",
+        commercial_register_number: "",
+        commercial_register_file: undefined,
+      }),
+      ...(role === "organization" && {
+        business_name: "",
+        commercial_register_number: "",
+        commercial_register_file: undefined,
+      }),
     },
     shouldUnregister: true,
   });
   React.useEffect(() => {
     if (store.roleData.thirdPartyInfo) {
-      if (store.roleData.thirdPartyInfo.firstName) {
-        form.setValue("firstName", store.roleData.thirdPartyInfo.firstName);
+      const thirdPartyInfo = store.roleData.thirdPartyInfo;
+      // Combine firstName and lastName into name field
+      if (thirdPartyInfo.firstName || thirdPartyInfo.lastName) {
+        const fullName = `${thirdPartyInfo.firstName || ""} ${
+          thirdPartyInfo.lastName || ""
+        }`.trim();
+        form.setValue("name", fullName);
       }
-      if (store.roleData.thirdPartyInfo.lastName) {
-        form.setValue("lastName", store.roleData.thirdPartyInfo.lastName);
-      }
-      if (store.roleData.thirdPartyInfo.email) {
-        form.setValue("email", store.roleData.thirdPartyInfo.email);
+      if (thirdPartyInfo.email) {
+        form.setValue("email", thirdPartyInfo.email);
       }
     }
   }, [store.roleData.thirdPartyInfo, form]);
@@ -104,7 +155,7 @@ const CombinedRegistrationForm: React.FC<{ role: string }> = ({ role }) => {
     return () => subscription.unsubscribe();
   }, [form, store]);
 
-  const handleSubmit = async (values: z.infer<typeof schema>) => {
+  const handleSubmit = async (values: any) => {
     store.clearError();
 
     store.setAuthMethod("email");
@@ -120,7 +171,6 @@ const CombinedRegistrationForm: React.FC<{ role: string }> = ({ role }) => {
     // Set auth method to third party first
     store.setAuthMethod("thirdParty");
 
-    // Clear any previous result
     clearLastResult();
 
     // Start the Google OAuth flow
@@ -181,35 +231,20 @@ const CombinedRegistrationForm: React.FC<{ role: string }> = ({ role }) => {
                 onSubmit={form.handleSubmit(handleSubmit)}
                 className="form-section"
               >
-                {/* First / Last Name */}
-                <div className="form-grid-2">
-                  <FormField
-                    control={form.control}
-                    name="firstName"
-                    render={({ field }) => (
-                      <FormItem className="form-item-vertical">
-                        <FormLabel>{authT("personalInfo.firstName")}</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled={isLoading} />
-                        </FormControl>
-                        <FormMessage className="form-message-min-height" />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="lastName"
-                    render={({ field }) => (
-                      <FormItem className="form-item-vertical">
-                        <FormLabel>{authT("personalInfo.lastName")}</FormLabel>
-                        <FormControl>
-                          <Input {...field} disabled={isLoading} />
-                        </FormControl>
-                        <FormMessage className="form-message-height" />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                {/* Full Name */}
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{authT("personalInfo.fullName")}</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={isLoading} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 {/* Email */}
                 <FormField
@@ -234,18 +269,37 @@ const CombinedRegistrationForm: React.FC<{ role: string }> = ({ role }) => {
                 {/* Phone Number */}
                 <FormField
                   control={form.control}
-                  name="phoneNumber"
+                  name="phone"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
                         {authT("personalInfo.phoneNumber")}{" "}
                       </FormLabel>
                       <FormControl>
-                        <PhoneInput
-                          value={field.value as E164Number}
-                          onChange={field.onChange}
+                        <Input
+                          {...field}
+                          type="tel"
+                          placeholder="050 000 0000"
                           disabled={isLoading}
-                          smartCaret={true}
+                          value={
+                            field.value
+                              ? field.value.replace(
+                                  /(\d{3})(\d{3})(\d{4})/,
+                                  "$1 $2 $3"
+                                )
+                              : ""
+                          }
+                          onChange={(e) => {
+                            // Format phone number as user types
+                            let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
+                            if (value.startsWith("966")) {
+                              value = value.substring(3); // Remove 966 prefix if user types it
+                            }
+                            if (value.length > 10) {
+                              value = value.substring(0, 10); // Limit to 10 digits
+                            }
+                            field.onChange(value);
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -298,7 +352,7 @@ const CombinedRegistrationForm: React.FC<{ role: string }> = ({ role }) => {
 
                 <FormField
                   control={form.control}
-                  name="confirmPassword"
+                  name="password_confirmation"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
@@ -335,37 +389,281 @@ const CombinedRegistrationForm: React.FC<{ role: string }> = ({ role }) => {
                   )}
                 />
 
-                {/* Terms and Privacy */}
-                <FormField
-                  control={form.control}
-                  name="agreeToTerms"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={isLoading}
-                        />
-                      </FormControl>
-                      <div className="form-checkbox-content">
-                        <FormLabel className="flex flex-wrap">
-                          <span>
-                            {authT("terms.text")}{" "}
-                            <Link href="#" className="link-muted">
-                              {authT("terms.termsLink")}
-                            </Link>{" "}
-                            {authT("terms.and")}{" "}
-                            <Link href="#" className="link-alt">
-                              {authT("terms.privacyLink")}
-                            </Link>
-                          </span>
+                {/* Role-specific fields */}
+                {role === "individual" && (
+                  <FormField
+                    control={form.control}
+                    name="national_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {authT("personalInfo.nationalId")}
                         </FormLabel>
+                        <FormControl>
+                          <Input {...field} disabled={isLoading} />
+                        </FormControl>
                         <FormMessage />
-                      </div>
-                    </FormItem>
-                  )}
-                />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                {(role === "supplier" ||
+                  role === "contractor" ||
+                  role === "organization") && (
+                  <FormField
+                    control={form.control}
+                    name="business_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {authT("personalInfo.businessName")}
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} disabled={isLoading} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                {(role === "supplier" ||
+                  role === "contractor" ||
+                  role === "organization") && (
+                  <FormField
+                    control={form.control}
+                    name="commercial_register_number"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {authT("personalInfo.commercialRegisterNumber")}
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} disabled={isLoading} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                {role === "supplier" && (
+                  <FormField
+                    control={form.control}
+                    name="commercial_register_file"
+                    render={({ field: { onChange, value, ...field } }) => (
+                      <FormItem>
+                        <FormControl>
+                          <FileUpload
+                            value={value}
+                            onChange={onChange}
+                            disabled={isLoading}
+                            label={authT("personalInfo.commercialRegisterFile")}
+                            placeholder={authT(
+                              "personalInfo.commercialRegisterFile"
+                            )}
+                            accept=".pdf,.jpg,.jpeg,.png,.webp"
+                            maxSizeMB={8}
+                            id="commercial-register-file-upload-supplier"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                {role === "contractor" && (
+                  <FormField
+                    control={form.control}
+                    name="commercial_register_file"
+                    render={({ field: { onChange, value, ...field } }) => (
+                      <FormItem>
+                        <FormControl>
+                          <FileUpload
+                            value={value}
+                            onChange={onChange}
+                            disabled={isLoading}
+                            label={authT("personalInfo.commercialRegisterFile")}
+                            placeholder={authT(
+                              "personalInfo.commercialRegisterFile"
+                            )}
+                            accept=".pdf,.jpg,.jpeg,.png,.webp"
+                            maxSizeMB={8}
+                            id="commercial-register-file-upload-contractor"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                {role === "organization" && (
+                  <FormField
+                    control={form.control}
+                    name="commercial_register_file"
+                    render={({ field: { onChange, value, ...field } }) => (
+                      <FormItem>
+                        <FormControl>
+                          <FileUpload
+                            value={value}
+                            onChange={onChange}
+                            disabled={isLoading}
+                            label={authT("personalInfo.commercialRegisterFile")}
+                            placeholder={authT(
+                              "personalInfo.commercialRegisterFile"
+                            )}
+                            accept=".pdf,.jpg,.jpeg,.png,.webp"
+                            maxSizeMB={8}
+                            id="commercial-register-file-upload"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                {role === "engineering_office" && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="business_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {authT("personalInfo.businessName")}
+                          </FormLabel>
+                          <FormControl>
+                            <Input {...field} disabled={isLoading} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="license_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {authT("personalInfo.licenseNumber")}
+                          </FormLabel>
+                          <FormControl>
+                            <Input {...field} disabled={isLoading} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="commercial_register_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {authT("personalInfo.commercialRegisterNumber")}
+                          </FormLabel>
+                          <FormControl>
+                            <Input {...field} disabled={isLoading} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="commercial_register_file"
+                      render={({ field: { onChange, value, ...field } }) => (
+                        <FormItem>
+                          <FormControl>
+                            <FileUpload
+                              value={value}
+                              onChange={onChange}
+                              disabled={isLoading}
+                              label={authT(
+                                "personalInfo.commercialRegisterFile"
+                              )}
+                              placeholder={authT(
+                                "personalInfo.commercialRegisterFile"
+                              )}
+                              accept=".pdf,.jpg,.jpeg,.png,.webp"
+                              maxSizeMB={8}
+                              id="commercial-register-file-upload-engineering"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
+
+                {role === "freelance_engineer" && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="engineers_association_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {authT("personalInfo.engineersAssociationNumber")}
+                          </FormLabel>
+                          <FormControl>
+                            <Input {...field} disabled={isLoading} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="commercial_register_file"
+                      render={({ field: { onChange, value, ...field } }) => (
+                        <FormItem>
+                          <FormControl>
+                            <FileUpload
+                              value={value}
+                              onChange={onChange}
+                              disabled={isLoading}
+                              label={authT(
+                                "personalInfo.commercialRegisterFile"
+                              )}
+                              placeholder={authT(
+                                "personalInfo.commercialRegisterFile"
+                              )}
+                              accept=".pdf,.jpg,.jpeg,.png,.webp"
+                              maxSizeMB={8}
+                              id="commercial-register-file-upload-freelance"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
+
+                {/* Terms and Privacy - Note: Terms validation is handled separately */}
+                <div className="flex flex-row items-start space-x-3 space-y-0">
+                  <Checkbox checked={true} disabled={isLoading} />
+                  <div className="form-checkbox-content">
+                    <FormLabel className="flex flex-wrap">
+                      <span>
+                        {authT("terms.text")}{" "}
+                        <Link href="#" className="link-muted">
+                          {authT("terms.termsLink")}
+                        </Link>{" "}
+                        {authT("terms.and")}{" "}
+                        <Link href="#" className="link-alt">
+                          {authT("terms.privacyLink")}
+                        </Link>
+                      </span>
+                    </FormLabel>
+                  </div>
+                </div>
 
                 {/* Error Display */}
                 {store.error && (
@@ -388,22 +686,25 @@ const CombinedRegistrationForm: React.FC<{ role: string }> = ({ role }) => {
             </Form>
 
             {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  {authT("roleSelection.or")}
-                </span>
-              </div>
-            </div>
+            {role === "individual" && (
+              <>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      {authT("roleSelection.or")}
+                    </span>
+                  </div>
+                </div>
 
-            {/* Social Login Buttons */}
-            <div className="space-y-3">
-              <GoogleAuthButton handleGoogleSignUp={handleGoogleSignUp} />
-              <AppleAuthButton handleAppleSignUp={handleAppleSignUp} />
-            </div>
+                <div className="space-y-3">
+                  <GoogleAuthButton handleGoogleSignUp={handleGoogleSignUp} />
+                  <AppleAuthButton handleAppleSignUp={handleAppleSignUp} />
+                </div>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>
