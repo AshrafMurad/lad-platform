@@ -1,4 +1,7 @@
-export const throttle = (func: (...args: unknown[]) => void, limit: number): ((...args: unknown[]) => void) => {
+export const throttle = (
+  func: (...args: unknown[]) => void,
+  limit: number
+): ((...args: unknown[]) => void) => {
   let lastFunc: ReturnType<typeof setTimeout> | null = null;
   let lastRan: number | null = null;
 
@@ -10,15 +13,12 @@ export const throttle = (func: (...args: unknown[]) => void, limit: number): ((.
       if (lastFunc !== null) {
         clearTimeout(lastFunc);
       }
-      lastFunc = setTimeout(
-        () => {
-          if (Date.now() - (lastRan as number) >= limit) {
-            func.apply(this, args);
-            lastRan = Date.now();
-          }
-        },
-        limit - (Date.now() - (lastRan as number)),
-      );
+      lastFunc = setTimeout(() => {
+        if (Date.now() - (lastRan as number) >= limit) {
+          func.apply(this, args);
+          lastRan = Date.now();
+        }
+      }, limit - (Date.now() - (lastRan as number)));
     }
   };
 };
@@ -32,7 +32,7 @@ export const throttle = (func: (...args: unknown[]) => void, limit: number): ((.
  */
 export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
-  wait: number,
+  wait: number
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout | null = null;
 
@@ -63,17 +63,22 @@ export function uid(): string {
  * @param count - The number of initials to return. Defaults to all initials.
  * @returns A string of initials from the name.
  */
-export const getInitials = (name: string | null | undefined, count?: number): string => {
-  if (!name || typeof name !== 'string') {
-    return '';
+export const getInitials = (
+  name: string | null | undefined,
+  count?: number
+): string => {
+  if (!name || typeof name !== "string") {
+    return "";
   }
 
   const initials = name
-    .split(' ')
+    .split(" ")
     .filter(Boolean)
     .map((part) => part[0].toUpperCase());
 
-  return count && count > 0 ? initials.slice(0, count).join('') : initials.join('');
+  return count && count > 0
+    ? initials.slice(0, count).join("")
+    : initials.join("");
 };
 
 /**
@@ -84,10 +89,10 @@ export const getInitials = (name: string | null | undefined, count?: number): st
  */
 export function formatDate(input: Date | string | number): string {
   const date = new Date(input);
-  return date.toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
   });
 }
 
@@ -99,12 +104,12 @@ export function formatDate(input: Date | string | number): string {
  */
 export function formatDateTime(input: Date | string | number): string {
   const date = new Date(input);
-  return date.toLocaleString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
+  return date.toLocaleString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "numeric",
     hour12: true,
   });
 }
@@ -117,10 +122,35 @@ export function formatDateTime(input: Date | string | number): string {
  * @param locale - The locale for formatting (e.g., "en-US"). Defaults to "en-US".
  * @returns A string formatted as currency.
  */
-export function formatCurrency(amount: number, currency: string = 'USD', locale: string = 'en-US'): string {
+export function formatCurrency(
+  amount: number,
+  currency: string = "USD",
+  locale: string = "en-US"
+): string {
   return new Intl.NumberFormat(locale, {
-    style: 'currency',
+    style: "currency",
     currency,
+  }).format(amount);
+}
+
+/**
+ * Formats price using project's default currency configuration.
+ * Uses the CURRENCY_CONFIG from global constants for consistent currency display.
+ *
+ * @param amount - The numeric value to format as price.
+ * @param isRTL - Whether to use RTL locale formatting. Defaults to false.
+ * @returns A string formatted as price with project's default currency.
+ */
+export function formatPrice(amount: number, isRTL: boolean = false): string {
+  // Import here to avoid circular dependencies
+  const { CURRENCY_CONFIG } = require("@/constants/global");
+  const currency = CURRENCY_CONFIG.DEFAULT_CURRENCY;
+  const { locale } = CURRENCY_CONFIG.DISPLAY_FORMATS[currency];
+
+  return new Intl.NumberFormat(isRTL ? locale : "en-US", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 0,
   }).format(amount);
 }
 
@@ -142,7 +172,7 @@ export function absoluteUrl(path: string): string {
  */
 export function toAbsoluteUrl(path: string): string {
   // Remove leading slash if present to avoid double slashes
-  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  const cleanPath = path.startsWith("/") ? path.slice(1) : path;
   return `/${cleanPath}`;
 }
 
@@ -153,22 +183,25 @@ export function toAbsoluteUrl(path: string): string {
 */
 export const getTimeZones = (): { label: string; value: string }[] => {
   // Fetch supported timezones
-  const timezones = Intl.supportedValuesOf('timeZone');
+  const timezones = Intl.supportedValuesOf("timeZone");
 
   return timezones
     .map((timezone) => {
-      const formatter = new Intl.DateTimeFormat('en', {
+      const formatter = new Intl.DateTimeFormat("en", {
         timeZone: timezone,
-        timeZoneName: 'shortOffset',
+        timeZoneName: "shortOffset",
       });
       const parts = formatter.formatToParts(new Date());
-      const offset = parts.find((part) => part.type === 'timeZoneName')?.value || '';
-      const formattedOffset = offset === 'GMT' ? 'GMT+0' : offset;
+      const offset =
+        parts.find((part) => part.type === "timeZoneName")?.value || "";
+      const formattedOffset = offset === "GMT" ? "GMT+0" : offset;
 
       return {
         value: timezone,
-        label: `(${formattedOffset}) ${timezone.replace(/_/g, ' ')}`,
-        numericOffset: parseInt(formattedOffset.replace('GMT', '').replace('+', '') || '0'),
+        label: `(${formattedOffset}) ${timezone.replace(/_/g, " ")}`,
+        numericOffset: parseInt(
+          formattedOffset.replace("GMT", "").replace("+", "") || "0"
+        ),
       };
     })
     .sort((a, b) => a.numericOffset - b.numericOffset);
@@ -181,17 +214,17 @@ export const getTimeZones = (): { label: string; value: string }[] => {
  */
 export function getSlug(title: string): string {
   // Return empty string for invalid input
-  if (!title || typeof title !== 'string') {
-    return '';
+  if (!title || typeof title !== "string") {
+    return "";
   }
 
   return title
     .toLowerCase() // Convert to lowercase for consistency
     .trim() // Remove leading/trailing whitespace
-    .normalize('NFD') // Normalize unicode (e.g., "é" -> "e")
-    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters except spaces/hyphens
-    .replaceAll(/\s+/g, '-') // Replace spaces with single hyphen
-    .replace(/-+/g, '-') // Collapse multiple hyphens
-    .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+    .normalize("NFD") // Normalize unicode (e.g., "é" -> "e")
+    .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
+    .replace(/[^a-z0-9\s-]/g, "") // Remove special characters except spaces/hyphens
+    .replaceAll(/\s+/g, "-") // Replace spaces with single hyphen
+    .replace(/-+/g, "-") // Collapse multiple hyphens
+    .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
 }
