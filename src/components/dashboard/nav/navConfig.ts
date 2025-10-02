@@ -98,12 +98,28 @@ export const roleNav = {
       url: "/dashboard/supplier/offers",
       icon: HandCoins,
     },
-    { title: "navigation.browseProjects", url: "/dashboard/supplier/browse-projects", icon: FolderOpen },
-    { title: "navigation.manageProducts", url: "/dashboard/supplier/manage-products", icon: Package },
-    { title: "navigation.messages", url: "/dashboard/supplier/messages", icon: MessageSquare },
+    {
+      title: "navigation.browseProjects",
+      url: "/dashboard/supplier/browse-projects",
+      icon: FolderOpen,
+    },
+    {
+      title: "navigation.manageProducts",
+      url: "/dashboard/supplier/products",
+      icon: Package,
+    },
+    {
+      title: "navigation.messages",
+      url: "/dashboard/supplier/messages",
+      icon: MessageSquare,
+    },
   ],
   organization: [
-    { title: "navigation.dashboard", url: "/dashboard/organization", icon: Home },
+    {
+      title: "navigation.dashboard",
+      url: "/dashboard/organization",
+      icon: Home,
+    },
     {
       title: "navigation.projects",
       url: "/dashboard/organization/projects",

@@ -860,8 +860,16 @@ body {
   }
 }
 
-/* DEBUG: Overflow Detection - Remove after fixing */
+/* RTL-aware Switch Component */
+[dir="rtl"] [data-state="checked"] [data-radix-switch-thumb] {
+  transform: translateX(-20px);
+}
 
+[dir="rtl"] [data-state="unchecked"] [data-radix-switch-thumb] {
+  transform: translateX(0px);
+}
+
+/* DEBUG: Overflow Detection - Remove after fixing */
 .debug-overflow [style*="overflow"] {
   outline: 4px solid orange !important;
   background: rgba(255, 165, 0, 0.2) !important;

@@ -100,7 +100,6 @@
     "filters": "Filters",
     "clearSearch": "Clear Search"
   },
-
   "Header": {
     "l": "L",
     "logo": "LAD Platform",
@@ -116,7 +115,6 @@
     "contactus": "Contact Us",
     "login": "Login"
   },
-
   "hero": {
     "title": "Your project is ready to launch? Start today with easy steps.",
     "description": "From a client looking to execute their project to an engineer or contractor seeking to prove their expertise—Lad brings you together in one marketplace to build projects with reliability and transparency.",
@@ -124,7 +122,6 @@
     "login": "Log in",
     "partners": "Trusted partners"
   },
-
   "features": {
     "title": "Diverse Features and Endless Possibilities",
     "description": "A unified platform that enables individuals, companies, and contractors to collaborate and grow.",
@@ -138,7 +135,6 @@
   "servicesAndBenefits": {
     "title": "Our Services & Benefits",
     "description": "Discover how the LAD platform can transform your journey in construction and engineering",
-
     "services": {
       "smartMatching": {
         "title": "Smart Project Matching",
@@ -182,7 +178,6 @@
     "title": "Everything About LAD",
     "description": "Our company aims to achieve customer satisfaction where our strategy and policies are the constant pursuit of customer satisfaction in the execution of our projects in terms of quality, deadlines, and during the project implementation stages."
   },
-
   "howItWorks": {
     "title": "How does LAD work ?",
     "description": "After creating your user account, you can upload your project details. The site will then match your request with qualified contractors and display the offers submitted to you. You can compare bids and negotiate with contractors.",
@@ -196,7 +191,6 @@
     "step4": "Project execution",
     "step4Description": "Follow the project's execution step by step with contractor ratings and full"
   },
-
   "browseProjects": {
     "title": "Browse Projects",
     "viewAll": "View All",
@@ -236,7 +230,6 @@
     "download": "Download",
     "review": "Review"
   },
-
   "testimonials": {
     "title": "Trusted by Professionals in Construction & Engineering",
     "description": "LAD brings together contractors, engineers, suppliers, and clients in one place. Here's what professionals are saying about the platform.",
@@ -280,7 +273,6 @@
     "title": "New Opportunities and Successful Projects in Construction Await You",
     "getStarted": "Get Started"
   },
-
   "whoItsFor": {
     "title": "LAD Platform for Everyone",
     "subtitle": "Discover how LAD can transform your journey in construction and engineering, whether you're seeking services or providing them",
@@ -303,7 +295,6 @@
     "registerNow": "Register Now",
     "comingSoon": "Coming Soon"
   },
-
   "footer": {
     "copyright": "© {year} LAD, All rights reserved",
     "description": "Connecting construction professionals with quality projects and opportunities across the region.",
@@ -330,7 +321,6 @@
       "news": "News"
     }
   },
-
   "auth": {
     "title": "Welcome",
     "subtitle": "Create your account to get started",
@@ -377,7 +367,6 @@
       "sendingResetLink": "Sending reset link...",
       "emailOrPhoneLabel": "Email or phone number"
     },
-
     "newPassword": {
       "title": "Create New Password",
       "description": "Your new password must be different from previously used passwords.",
@@ -403,13 +392,11 @@
       "successDescription": "Your password has been updated successfully. You can now sign in with your new password.",
       "continueToLogin": "Continue to Login"
     },
-
     "authMethod": {
       "email": "Continue with Email",
       "phone": "Continue with Phone",
       "thirdParty": "Continue with Google"
     },
-
     "groupSelector": {
       "title": "Choose Your Category",
       "description": "Select whether you're looking for services or providing services",
@@ -423,14 +410,12 @@
     "roleSelection": {
       "title": "Your Journey Starts With a Role",
       "description": "At LAD, we connect seekers, providers, and innovators. Choose the role that reflects who you are, and we’ll craft a unique path to help you achieve your goals.",
-
       "serviceSeeker": "Client",
       "serviceProvider": "Service Provider",
       "selectRole": "Select Role",
       "or": "or",
       "haveAccount": "Already have an account?"
     },
-
     "verification": {
       "title": "Account Verification",
       "enterCode": "Enter the verification code sent to",
@@ -466,7 +451,6 @@
         "verified": "Your {type} has been verified successfully."
       }
     },
-
     "roleSelector": {
       "description": "Choose your role to continue",
       "serviceSeeker": "Service Seeker",
@@ -492,7 +476,6 @@
       "supplierDescription": "For suppliers and equipment providers",
       "supplierButtonText": "Apply as Supplier"
     },
-
     "personalInfo": {
       "title": "Personal Information",
       "emailRegistration": "Email Registration",
@@ -516,14 +499,12 @@
       "commercialRegisterFile": "Commercial Register File",
       "continue": "Continue"
     },
-
     "terms": {
       "text": "By continuing, you agree to our",
       "termsLink": "Terms of Service",
       "and": "and",
       "privacyLink": "Privacy Policy"
     },
-
     "onboarding": {
       "steps": {
         "createAccount": "Create new account",
@@ -545,7 +526,6 @@
         }
       }
     },
-
     "success": {
       "defaultName": "there",
       "welcome": "Welcome, {name}!",
@@ -580,14 +560,12 @@
         "checkPhone": "Check your phone for a welcome message!"
       }
     },
-
     "errors": {
       "loginFailed": "Login failed. Please try again.",
       "emailRequired": "Please enter a valid email address",
       "phoneRequired": "Phone number is required",
       "passwordRequired": "Password is required"
     },
-
     "completeProfile": {
       "title": "Complete Your Profile",
       "desc": "Complete your profile to unlock all features and get the most out of our platform. This will help us provide you with better recommendations and services.",
@@ -597,7 +575,6 @@
       }
     }
   },
-
   "navigation": {
     "dashboard": "Dashboard",
     "projects": "My Projects",
@@ -612,7 +589,6 @@
     "profile": "Profile",
     "settings": "Settings"
   },
-
   "offers": {
     "searchOffers": "Search offers...",
     "sortBy": "Sort by",
@@ -682,7 +658,6 @@
       "referenceNotePlaceholder": "Optional reference note"
     }
   },
-
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome back, {name}!",
@@ -742,7 +717,6 @@
       }
     }
   },
-
   "profile": {
     "title": "Profile",
     "editProfile": "Edit Profile",
@@ -1702,7 +1676,6 @@
       "error": "Failed to send project to review"
     }
   },
-
   "feedback": {
     "errors": {
       "general": "Something went wrong",
@@ -1722,7 +1695,6 @@
       "profileCreate": "Profile created successfully",
       "dataSaved": "Data saved successfully"
     },
-
     "validation": {
       "firstName": {
         "required": "First name is required",
@@ -1909,7 +1881,6 @@
           "required": "Covers all regions status is required"
         }
       },
-
       "representativeIdImage": {
         "required": "Representative ID image is required"
       },
@@ -1994,7 +1965,6 @@
       "officialContactInformation": {
         "required": "Official contact information document is required"
       },
-
       "fullName": {
         "required": "Full name is required",
         "minLength": "Full name must be at least 2 characters",
@@ -2126,7 +2096,50 @@
     "organizationContactPersonFullName": "Enter organization contact person full name",
     "organizationPhoneNumber": "Enter organization phone number"
   },
-
+  "products": {
+    "back": "Back",
+    "goBack": "Go Back",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+    "share": "Share",
+    "hide": "Hide",
+    "show": "Show",
+    "deleting": "Deleting...",
+    "off": "OFF",
+    "discount": "OFF",
+    "noImage": "No Image",
+    "noDescription": "No description",
+    "more": "More",
+    "bestSeller": "Best Seller",
+    "specialOffer": "Special Offer",
+    "description": "Description",
+    "productDetails": "Product Details",
+    "id": "ID:",
+    "order": "Order:",
+    "created": "Created:",
+    "notFound": {
+      "title": "Product Not Found",
+      "message": "The requested product could not be found"
+    },
+    "errors": {
+      "failedToLoad": "Failed to load product",
+      "deleteFailed": "Failed to delete product",
+      "deleteError": "Error deleting product"
+    },
+    "success": {
+      "deleteSuccess": "Product deleted successfully"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "management": {
+      "title": "Products Management",
+      "addProduct": "Add Product",
+      "searchAndFilters": "Search & Filters",
+      "searchPlaceholder": "Search products...",
+      "allCategories": "All Categories"
   "projectsList": {
     "title": "My Projects",
     "subtitle": "Manage and track your construction projects",
