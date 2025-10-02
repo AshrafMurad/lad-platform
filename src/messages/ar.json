@@ -98,7 +98,6 @@
     "filters": "تصفيات",
     "clearSearch": "مسح البحث"
   },
-
   "Header": {
     "l": "L",
     "logo": "منصة لاد للمقاولات",
@@ -320,7 +319,6 @@
       "news": "الأخبار"
     }
   },
-
   "auth": {
     "title": "مرحباً",
     "subtitle": "أنشئ حسابك للبدء",
@@ -332,7 +330,6 @@
     "forgotPassword": "هل نسيت كلمة المرور؟",
     "resendCode": "إعادة إرسال الرمز",
     "continue": "متابعة",
-
     "passwordReset": {
       "sentPasswordReset": "لقد أرسلنا رابط إعادة التعيين إلى",
       "checkEmail": "تحقق من بريدك الإلكتروني",
@@ -369,7 +366,6 @@
       "sendingResetCode": "إرسال رمز إعادة التعيين...",
       "emailOrPhoneLabel": "البريد الإلكتروني أو رقم هاتفك"
     },
-
     "newPassword": {
       "title": "أنشئ كلمة مرور جديدة",
       "description": "يجب أن تكون كلمة المرور الجديدة مختلفة عن كلمات المرور السابقة المستخدمة.",
@@ -402,7 +398,6 @@
       "google": "جوجل",
       "apple": "آبل"
     },
-
     "groupSelector": {
       "title": "اختر فئتك",
       "description": "اختر ما إذا كنت تبحث عن خدمات أم تقدم خدمات",
@@ -416,14 +411,12 @@
     "roleSelection": {
       "title": "رحلتك تبدأ من اختيار دورك",
       "description": "في لاد، نربط بين طالبي الخدمات، ومقدمي الخبرات، والمبتكرين. اختر الدور الذي يعبر عنك، ودعنا نصمم لك مسارًا فريدًا يوصلك إلى أهدافك.",
-
       "serviceSeeker": "عميل",
       "serviceProvider": "مقدم خدمات",
       "selectRole": "اختر الدور",
       "or": "أو",
       "haveAccount": "لديك حساب بالفعل؟"
     },
-
     "verification": {
       "title": "التحقق من الحساب",
       "enterCode": "أدخل رمز التأكيد المرسل إلى",
@@ -459,7 +452,6 @@
         "verified": "تم التحقق من {type} بنجاح."
       }
     },
-
     "roleSelector": {
       "description": "اختر دورك للمتابعة",
       "serviceSeeker": "طالب خدمة",
@@ -502,14 +494,12 @@
       "nationalId": "الهوية الوطنية",
       "continue": "متابعة"
     },
-
     "terms": {
       "text": "بالمتابعة، أنت توافق على",
       "termsLink": "شروط الخدمة",
       "and": "و",
       "privacyLink": "سياسة الخصوصية"
     },
-
     "onboarding": {
       "steps": {
         "createAccount": "إنشاء حساب جديد",
@@ -531,7 +521,6 @@
         }
       }
     },
-
     "success": {
       "defaultName": "هناك",
       "welcome": "مرحباً، {name}!",
@@ -566,14 +555,12 @@
         "checkPhone": "تحقق من هاتفك للحصول على رسالة ترحيب!"
       }
     },
-
     "errors": {
       "loginFailed": "فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.",
       "emailRequired": "يرجى إدخال بريد إلكتروني صالح",
       "phoneRequired": "رقم الهاتف مطلوب",
       "passwordRequired": "كلمة المرور مطلوبة"
     },
-
     "completeProfile": {
       "title": "أكمل ملفك الشخصي",
       "desc": "أكمل ملفك الشخصي لفتح جميع الميزات والاستفادة القصوى من منصتنا. سيساعدنا هذا في تقديم توصيات وخدمات أفضل لك.",
@@ -583,7 +570,6 @@
       }
     }
   },
-
   "offers": {
     "searchOffers": "البحث في العروض...",
     "sortBy": "ترتيب حسب",
@@ -653,7 +639,6 @@
       "referenceNotePlaceholder": "ملاحظة مرجعية اختيارية"
     }
   },
-
   "navigation": {
     "dashboard": "لوحة التحكم",
     "projects": "مشاريعي",
@@ -666,7 +651,6 @@
     "reviews": "التقييمات",
     "settings": "الاعدادات"
   },
-
   "dashboard": {
     "title": "لوحة التحكم",
     "welcome": "مرحباً بعودتك، {name}!",
@@ -726,7 +710,6 @@
       }
     }
   },
-
   "profile": {
     "title": "الملف الشخصي",
     "editProfile": "تعديل الملف الشخصي",
@@ -765,7 +748,6 @@
         "aboutMe": "نبذة عني",
         "companyName": "اسم الشركة"
       },
-
       "notProvided": "غير متوفر",
       "defaultRole": "فرد",
       "noPersonalData": "لا توجد بيانات شخصية متاحة",
@@ -1345,7 +1327,6 @@
       "saving": "جاري الحفظ...",
       "loading": "جاري تحميل البيانات التشغيلية...",
       "retry": "إعادة المحاولة",
-
       "success": {
         "updateSuccess": "تم تحديث المعلومات التشغيلية بنجاح"
       },
@@ -1360,7 +1341,6 @@
           "targetProjectRanges": "نطاقات قيمة المشاريع المستهدفة",
           "targetProjectRangesDescription": "اختر جميع نطاقات قيمة المشاريع المستهدفة المناسبة"
         },
-
         "classification": {
           "title": "التصنيف والاعتماد",
           "description": "تفاصيل تصنيف واعتماد المقاول",
@@ -1650,7 +1630,6 @@
       "profileCreate": "تم إنشاء الملف الشخصي بنجاح",
       "dataSaved": "تم حفظ البيانات بنجاح"
     },
-
     "validation": {
       "firstName": {
         "required": "الاسم الأول مطلوب",
@@ -1805,7 +1784,6 @@
           "required": "حالة تغطية جميع المناطق مطلوبة"
         }
       },
-
       "avatar": {
         "required": "شعار الشركة مطلوب"
       },
@@ -2019,5 +1997,51 @@
     "organizationName": "أدخل اسم المؤسسة",
     "organizationContactPersonFullName": "أدخل اسم الشخص المفوض",
     "organizationPhoneNumber": "أدخل رقم الهاتف الخاص بالمؤسسة"
+  },
+  "products": {
+    "back": "العودة",
+    "goBack": "العودة",
+    "view": "عرض",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "share": "مشاركة",
+    "hide": "إخفاء",
+    "show": "إظهار",
+    "deleting": "جارِ الحذف...",
+    "off": "خصم",
+    "discount": "خصم",
+    "noImage": "لا توجد صورة",
+    "noDescription": "لا يوجد وصف",
+    "more": "المزيد",
+    "bestSeller": "الأكثر مبيعاً",
+    "specialOffer": "عرض خاص",
+    "description": "الوصف",
+    "productDetails": "تفاصيل المنتج",
+    "id": "المعرف:",
+    "order": "الترتيب:",
+    "created": "تاريخ الإضافة:",
+    "notFound": {
+      "title": "المنتج غير موجود",
+      "message": "لم يتم العثور على المنتج المطلوب"
+    },
+    "errors": {
+      "failedToLoad": "فشل في تحميل بيانات المنتج",
+      "deleteFailed": "فشل في حذف المنتج",
+      "deleteError": "حدث خطأ أثناء حذف المنتج"
+    },
+    "success": {
+      "deleteSuccess": "تم حذف المنتج بنجاح"
+    },
+    "pagination": {
+      "previous": "السابق",
+      "next": "التالي"
+    },
+    "management": {
+      "title": "إدارة المنتجات",
+      "addProduct": "إضافة منتج",
+      "searchAndFilters": "البحث والتصفية",
+      "searchPlaceholder": "البحث في المنتجات...",
+      "allCategories": "جميع الفئات"
+    }
   }
 }
