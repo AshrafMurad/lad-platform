@@ -2140,69 +2140,71 @@
       "searchAndFilters": "Search & Filters",
       "searchPlaceholder": "Search products...",
       "allCategories": "All Categories"
-  "projectsList": {
-    "title": "My Projects",
-    "subtitle": "Manage and track your construction projects",
-    "loading": "Loading projects...",
-    "emptyState": {
-      "title": "No projects yet",
-      "description": "Get started by creating your first project",
-      "createButton": "Create New Project"
     },
-    "projectCard": {
-      "status": {
-        "notStarted": "Not Started",
-        "inProgress": "In Progress",
+    "projectsList": {
+      "title": "My Projects",
+      "subtitle": "Manage and track your construction projects",
+      "loading": "Loading projects...",
+      "emptyState": {
+        "title": "No projects yet",
+        "description": "Get started by creating your first project",
+        "createButton": "Create New Project"
+      },
+      "projectCard": {
+        "status": {
+          "notStarted": "Not Started",
+          "inProgress": "In Progress",
+          "completed": "Completed"
+        },
+        "details": {
+          "location": "Location",
+          "budget": "Budget",
+          "duration": "Duration",
+          "area": "Area"
+        },
+        "progress": {
+          "label": "Progress",
+          "steps": "steps",
+          "nextStep": "Next"
+        },
+        "actions": {
+          "edit": "Edit",
+          "view": "View"
+        }
+      },
+      "projectTypes": {
+        "1": "Residential Building",
+        "2": "Commercial Building",
+        "3": "Industrial Building",
+        "4": "Infrastructure",
+        "unknown": "Unknown"
+      },
+      "steps": {
+        "essentialInfo": "Essential Information",
+        "classification": "Classification",
+        "documents": "Documents",
+        "boq": "BOQ",
+        "publishSettings": "Publish Settings",
         "completed": "Completed"
       },
-      "details": {
-        "location": "Location",
-        "budget": "Budget",
-        "duration": "Duration",
-        "area": "Area"
+      "tabs": {
+        "all": "All Projects",
+        "inProgress": "In Progress",
+        "draft": "Draft",
+        "pendingOffers": "Pending Offers",
+        "pendingReview": "Pending Review",
+        "pendingSigning": "Pending Signing",
+        "completed": "Completed"
       },
-      "progress": {
-        "label": "Progress",
-        "steps": "steps",
-        "nextStep": "Next"
-      },
-      "actions": {
-        "edit": "Edit",
-        "view": "View"
+      "pagination": {
+        "showing": "Showing",
+        "of": "of",
+        "results": "results",
+        "previous": "Previous",
+        "next": "Next",
+        "page": "Page",
+        "goToPage": "Go to page"
       }
-    },
-    "projectTypes": {
-      "1": "Residential Building",
-      "2": "Commercial Building",
-      "3": "Industrial Building",
-      "4": "Infrastructure",
-      "unknown": "Unknown"
-    },
-    "steps": {
-      "essentialInfo": "Essential Information",
-      "classification": "Classification",
-      "documents": "Documents",
-      "boq": "BOQ",
-      "publishSettings": "Publish Settings",
-      "completed": "Completed"
-    },
-    "tabs": {
-      "all": "All Projects",
-      "inProgress": "In Progress",
-      "draft": "Draft",
-      "pendingOffers": "Pending Offers",
-      "pendingReview": "Pending Review",
-      "pendingSigning": "Pending Signing",
-      "completed": "Completed"
-    },
-    "pagination": {
-      "showing": "Showing",
-      "of": "of",
-      "results": "results",
-      "previous": "Previous",
-      "next": "Next",
-      "page": "Page",
-      "goToPage": "Go to page"
     }
   }
 }

@@ -2092,69 +2092,71 @@
       "searchAndFilters": "البحث والتصفية",
       "searchPlaceholder": "البحث في المنتجات...",
       "allCategories": "جميع الفئات"
-  "projectsList": {
-    "title": "مشاريعي",
-    "subtitle": "إدارة ومتابعة مشاريعك الإنشائية",
-    "loading": "جاري تحميل المشاريع...",
-    "emptyState": {
-      "title": "لا توجد مشاريع بعد",
-      "description": "ابدأ بإنشاء مشروعك الأول",
-      "createButton": "إنشاء مشروع جديد"
     },
-    "projectCard": {
-      "status": {
-        "notStarted": "لم يبدأ",
-        "inProgress": "قيد التنفيذ",
+    "projectsList": {
+      "title": "مشاريعي",
+      "subtitle": "إدارة ومتابعة مشاريعك الإنشائية",
+      "loading": "جاري تحميل المشاريع...",
+      "emptyState": {
+        "title": "لا توجد مشاريع بعد",
+        "description": "ابدأ بإنشاء مشروعك الأول",
+        "createButton": "إنشاء مشروع جديد"
+      },
+      "projectCard": {
+        "status": {
+          "notStarted": "لم يبدأ",
+          "inProgress": "قيد التنفيذ",
+          "completed": "مكتمل"
+        },
+        "details": {
+          "location": "الموقع",
+          "budget": "الميزانية",
+          "duration": "المدة",
+          "area": "المساحة"
+        },
+        "progress": {
+          "label": "التقدم",
+          "steps": "خطوات",
+          "nextStep": "التالي"
+        },
+        "actions": {
+          "edit": "تعديل",
+          "view": "عرض"
+        }
+      },
+      "projectTypes": {
+        "1": "مبنى سكني",
+        "2": "مبنى تجاري",
+        "3": "مبنى صناعي",
+        "4": "بنية تحتية",
+        "unknown": "غير محدد"
+      },
+      "steps": {
+        "essentialInfo": "البيانات الأساسية",
+        "classification": "التصنيف",
+        "documents": "المستندات",
+        "boq": "جدول الكميات",
+        "publishSettings": "إعدادات النشر",
         "completed": "مكتمل"
       },
-      "details": {
-        "location": "الموقع",
-        "budget": "الميزانية",
-        "duration": "المدة",
-        "area": "المساحة"
+      "tabs": {
+        "all": "جميع المشاريع",
+        "inProgress": "قيد التنفيذ",
+        "draft": "مسودة",
+        "pendingOffers": "في انتظار العروض",
+        "pendingReview": "في انتظار المراجعة",
+        "pendingSigning": "في انتظار التوقيع",
+        "completed": "مكتمل"
       },
-      "progress": {
-        "label": "التقدم",
-        "steps": "خطوات",
-        "nextStep": "التالي"
-      },
-      "actions": {
-        "edit": "تعديل",
-        "view": "عرض"
+      "pagination": {
+        "showing": "عرض",
+        "of": "من",
+        "results": "نتيجة",
+        "previous": "السابق",
+        "next": "التالي",
+        "page": "صفحة",
+        "goToPage": "انتقل إلى الصفحة"
       }
-    },
-    "projectTypes": {
-      "1": "مبنى سكني",
-      "2": "مبنى تجاري",
-      "3": "مبنى صناعي",
-      "4": "بنية تحتية",
-      "unknown": "غير محدد"
-    },
-    "steps": {
-      "essentialInfo": "البيانات الأساسية",
-      "classification": "التصنيف",
-      "documents": "المستندات",
-      "boq": "جدول الكميات",
-      "publishSettings": "إعدادات النشر",
-      "completed": "مكتمل"
-    },
-    "tabs": {
-      "all": "جميع المشاريع",
-      "inProgress": "قيد التنفيذ",
-      "draft": "مسودة",
-      "pendingOffers": "في انتظار العروض",
-      "pendingReview": "في انتظار المراجعة",
-      "pendingSigning": "في انتظار التوقيع",
-      "completed": "مكتمل"
-    },
-    "pagination": {
-      "showing": "عرض",
-      "of": "من",
-      "results": "نتيجة",
-      "previous": "السابق",
-      "next": "التالي",
-      "page": "صفحة",
-      "goToPage": "انتقل إلى الصفحة"
     }
   }
 }
